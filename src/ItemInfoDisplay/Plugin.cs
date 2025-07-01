@@ -45,7 +45,6 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     if (Character.observedCharacter.data.currentItem != null)
                     {
-                        //Log.LogInfo("sinceItemAttach: " + Character.observedCharacter.data.sinceItemAttach.ToString());
                         if (hasChanged)
                         {
                             hasChanged = false;
@@ -56,6 +55,18 @@ public partial class Plugin : BaseUnityPlugin
                             hasChanged = true;
                             lastKnownSinceItemAttach = Character.observedCharacter.data.sinceItemAttach;
                         }
+
+                        if (!itemInfoDisplay.activeSelf)
+                        {
+                            itemInfoDisplay.SetActive(true); Log.LogInfo("turning on");
+                        }
+                    }
+                    else
+                    {
+                        if (itemInfoDisplay.activeSelf) 
+                        {
+                            itemInfoDisplay.SetActive(false); Log.LogInfo("turning off");
+                        }
                     }
                 }
             }
@@ -65,49 +76,6 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
     }
-
-    private static class ItemInfoDisplayCharacterItemsUnequipPatch
-    {
-        [HarmonyPatch(typeof(CharacterItems), "UnAttatchEquipedItem")]
-        [HarmonyPrefix]
-        private static void ItemInfoDisplayCharacterItemsUnequip()
-        {
-            itemInfoDisplay.SetActive(false);
-            hasChanged = false;
-        }
-    }
-
-    private static class ItemInfoDisplayCharacterItemsEquipPatch
-    {
-        [HarmonyPatch(typeof(CharacterItems), "Equip")]
-        [HarmonyPostfix]
-        private static void ItemInfoDisplayCharacterItemsEquip()
-        {
-            itemInfoDisplay.SetActive(true);
-            hasChanged = true;
-        }
-    }
-
-    private static class ItemInfoDisplayItemCookingFinishCookingPatch
-    {
-        [HarmonyPatch(typeof(ItemCooking), "FinishCooking")]
-        [HarmonyPostfix]
-        private static void ItemInfoDisplayItemCookingFinishCooking()
-        {
-            hasChanged = true;
-        }
-    }
-
-    private static class ItemInfoDisplayActionReduceUsesReduceUsesRPCPatch
-    {
-        [HarmonyPatch(typeof(Action_ReduceUses), "ReduceUsesRPC")]
-        [HarmonyPostfix]
-        private static void ItemInfoDisplayActionReduceUsesReduceUsesRPC()
-        {
-            hasChanged = true;
-        }
-    }
-    
 
     private static void ProcessItemGameObject()
     {
