@@ -28,7 +28,7 @@ public partial class Plugin : BaseUnityPlugin
         InitEffectColors(effectColors);
         lastKnownSinceItemAttach = 0f;
         hasChanged = true;
-        forceUpdateTime = 1f;
+        forceUpdateTime = 0.5f;
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayCharacterItemsUpdatePatch));
         Log.LogInfo($"Plugin {Name} is loaded!");
     }
@@ -83,7 +83,7 @@ public partial class Plugin : BaseUnityPlugin
 
     private static void ProcessItemGameObject()
     {
-        Log.LogInfo(Character.observedCharacter.data.sinceItemAttach.ToString());
+        //Log.LogInfo(Character.observedCharacter.data.sinceItemAttach.ToString());
         Item item = Character.observedCharacter.data.currentItem;
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
@@ -195,7 +195,8 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].ToString().Contains("Action_RestoreHunger"))
             {
-                itemInfoDisplayText.text += "TODO: Action_RestoreHunger\n";
+                Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
+                itemInfoDisplayText.text += ProcessEffect((effect.restorationAmount * -1f), "Hunger") + "\n";
             }
             else if (itemComponents[i].ToString().Contains("Action_ShowBinocularOverlay"))
             {
@@ -240,7 +241,7 @@ public partial class Plugin : BaseUnityPlugin
         {
             result += "Remove ";
         }
-        result += Mathf.Round(Mathf.Abs(amount) * 100f).ToString() + " " + effectColors[effect] + effect + "</color>";
+        result += effectColors[effect] + Mathf.Round(Mathf.Abs(amount) * 100f).ToString() + " " + effect + "</color>";
 
         return result;
     }
