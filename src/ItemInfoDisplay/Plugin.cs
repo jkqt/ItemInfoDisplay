@@ -91,6 +91,7 @@ public partial class Plugin : BaseUnityPlugin
         for (int i = 0; i < itemComponents.Length; i++)
         {
             Log.LogInfo(itemComponents[i]);
+            // turn your eyes away from this massive pile of if else statements
             if (itemComponents[i].ToString().Contains("Action_ApplyAffliction"))
             {
                 itemInfoDisplayText.text += "TODO: Action_ApplyAffliction\n";
@@ -119,13 +120,21 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayText.text += "TODO: Action_ClearAllStatus\n";
             }
+            else if (itemComponents[i].ToString().Contains("Action_ConsumeAndSpawn"))
+            {
+                Action_ConsumeAndSpawn effect = (Action_ConsumeAndSpawn)itemComponents[i];
+                if (effect.itemToSpawn.ToString().Contains("Peel"))
+                {
+                    itemInfoDisplayText.text += "GAIN A PEEL WHEN EATEN\n";
+                }
+                else
+                {
+                    itemInfoDisplayText.text += "TODO: Action_ConsumeAndSpawn\n";
+                }
+            }
             else if (itemComponents[i].ToString().Contains("Action_Consume"))
             {
                 // ignore
-            }
-            else if (itemComponents[i].ToString().Contains("Action_ConsumeAndSpawn"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_ConsumeAndSpawn\n";
             }
             else if (itemComponents[i].ToString().Contains("Action_Die"))
             {
@@ -138,15 +147,15 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].ToString().Contains("Action_GiveExtraStamina"))
             {
                 Action_GiveExtraStamina effect = (Action_GiveExtraStamina)itemComponents[i];
-                itemInfoDisplayText.text += ProcessEffect(effect.amount, "Extra Stamina") + "\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_Guidebook"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_Guidebook\n";
+                itemInfoDisplayText.text += ProcessEffect(effect.amount, "Extra Stamina");
             }
             else if (itemComponents[i].ToString().Contains("Action_GuidebookScroll"))
             {
                 itemInfoDisplayText.text += "TODO: Action_GuidebookScroll\n";
+            }
+            else if (itemComponents[i].ToString().Contains("Action_Guidebook"))
+            {
+                itemInfoDisplayText.text += "TODO: Action_Guidebook\n";
             }
             else if (itemComponents[i].ToString().Contains("Action_InflictPoison"))
             {
@@ -163,7 +172,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].ToString().Contains("Action_ModifyStatus"))
             {
                 Action_ModifyStatus effect = (Action_ModifyStatus)itemComponents[i];
-                itemInfoDisplayText.text += ProcessEffect(effect.changeAmount, effect.statusType.ToString()) + "\n";
+                itemInfoDisplayText.text += ProcessEffect(effect.changeAmount, effect.statusType.ToString());
             }
             else if (itemComponents[i].ToString().Contains("Action_MoraleBoost"))
             {
@@ -196,7 +205,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].ToString().Contains("Action_RestoreHunger"))
             {
                 Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
-                itemInfoDisplayText.text += ProcessEffect((effect.restorationAmount * -1f), "Hunger") + "\n";
+                itemInfoDisplayText.text += ProcessEffect((effect.restorationAmount * -1f), "Hunger");
             }
             else if (itemComponents[i].ToString().Contains("Action_ShowBinocularOverlay"))
             {
@@ -224,7 +233,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].ToString().Contains("Actions_DefaultConstructActions"))
             {
-                itemInfoDisplayText.text += "TODO: Actions_DefaultConstructActions\n";
+                itemInfoDisplayText.text += "CAN BE PLACED\n";
             }
         }
     }
@@ -233,7 +242,11 @@ public partial class Plugin : BaseUnityPlugin
     {
         string result = "";
 
-        if (amount > 0)
+        if (amount == 0)
+        {
+            return result;
+        }
+        else if (amount > 0)
         {
             result += "Gain ";
         }
@@ -241,9 +254,9 @@ public partial class Plugin : BaseUnityPlugin
         {
             result += "Remove ";
         }
-        result += effectColors[effect] + Mathf.Round(Mathf.Abs(amount) * 100f).ToString() + " " + effect + "</color>";
+        result += effectColors[effect] + Mathf.Round(Mathf.Abs(amount) * 100f).ToString() + " " + effect + "</color>\n";
 
-        return result;
+        return result.ToUpper();
     }
 
     private static void AddDisplayObject()
@@ -282,7 +295,6 @@ public partial class Plugin : BaseUnityPlugin
         itemInfoDisplayRect.offsetMax = new Vector2(-75f, 320f);
         //itemInfoDisplayBackgroundImage.color = new Color(0f, 0f, 0f, 0.69f);
         itemInfoDisplayText.font = font;
-        itemInfoDisplayText.fontStyle = FontStyles.UpperCase;
         itemInfoDisplayText.fontSize = 20f;
         itemInfoDisplayText.alignment = TextAlignmentOptions.BottomLeft;
         itemInfoDisplayText.lineSpacing = -50f;
