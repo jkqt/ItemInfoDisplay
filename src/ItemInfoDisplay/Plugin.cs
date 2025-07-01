@@ -14,10 +14,17 @@ public partial class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource Log { get; private set; } = null!;
     private static GUIManager guiManager;
+    private static GameObject itemInfoDisplay;
+    private static float lastKnownSinceItemAttach;
+    private static bool hasChanged;
+    private static float forceUpdateTime;
 
     private void Awake()
     {
         Log = Logger;
+        lastKnownSinceItemAttach = 0f;
+        hasChanged = true;
+        forceUpdateTime = 1f;
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayCharacterItemsUpdatePatch));
         Log.LogInfo($"Plugin {Name} is loaded!");
     }
@@ -36,9 +43,19 @@ public partial class Plugin : BaseUnityPlugin
                 }
                 else
                 {
-                    if (Character.observedCharacter != null)
+                    if (Character.observedCharacter.data.currentItem != null)
                     {
-                        ProcessItemGameObject();
+                        //Log.LogInfo("sinceItemAttach: " + Character.observedCharacter.data.sinceItemAttach.ToString());
+                        if (hasChanged)
+                        {
+                            hasChanged = false;
+                            ProcessItemGameObject();
+                        }
+                        else if (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime)
+                        {
+                            hasChanged = true;
+                            lastKnownSinceItemAttach = Character.observedCharacter.data.sinceItemAttach;
+                        }
                     }
                 }
             }
@@ -49,9 +66,59 @@ public partial class Plugin : BaseUnityPlugin
         }
     }
 
+    private static class ItemInfoDisplayCharacterItemsUnequipPatch
+    {
+        [HarmonyPatch(typeof(CharacterItems), "UnAttatchEquipedItem")]
+        [HarmonyPrefix]
+        private static void ItemInfoDisplayCharacterItemsUnequip()
+        {
+            itemInfoDisplay.SetActive(false);
+            hasChanged = false;
+        }
+    }
+
+    private static class ItemInfoDisplayCharacterItemsEquipPatch
+    {
+        [HarmonyPatch(typeof(CharacterItems), "Equip")]
+        [HarmonyPostfix]
+        private static void ItemInfoDisplayCharacterItemsEquip()
+        {
+            itemInfoDisplay.SetActive(true);
+            hasChanged = true;
+        }
+    }
+
+    private static class ItemInfoDisplayItemCookingFinishCookingPatch
+    {
+        [HarmonyPatch(typeof(ItemCooking), "FinishCooking")]
+        [HarmonyPostfix]
+        private static void ItemInfoDisplayItemCookingFinishCooking()
+        {
+            hasChanged = true;
+        }
+    }
+
+    private static class ItemInfoDisplayActionReduceUsesReduceUsesRPCPatch
+    {
+        [HarmonyPatch(typeof(Action_ReduceUses), "ReduceUsesRPC")]
+        [HarmonyPostfix]
+        private static void ItemInfoDisplayActionReduceUsesReduceUsesRPC()
+        {
+            hasChanged = true;
+        }
+    }
+    
+
     private static void ProcessItemGameObject()
     {
-
+        Log.LogInfo(Character.observedCharacter.data.sinceItemAttach.ToString());
+        Item item = Character.observedCharacter.data.currentItem;
+        GameObject itemGameObj = item.gameObject;
+        Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
+        for (int i = 0; i < itemComponents.Length; i++)
+        {
+            Log.LogInfo(itemComponents[i].ToString());
+        }
     }
 
     private static void AddDisplayObject()
@@ -61,7 +128,7 @@ public partial class Plugin : BaseUnityPlugin
         TMPro.TMP_FontAsset font = guiManager.heroDayText.font;
         GameObject invGameObj = guiManagerGameObj.transform.Find("Canvas_HUD/Inventory").gameObject;
 
-        GameObject itemInfoDisplay = new GameObject("ItemInfoDisplay");
+        itemInfoDisplay = new GameObject("ItemInfoDisplay");
         itemInfoDisplay.transform.SetParent(invGameObj.transform);
         RectTransform itemInfoDisplayRect = itemInfoDisplay.AddComponent<RectTransform>();
 
