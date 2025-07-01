@@ -1,10 +1,10 @@
 # ItemInfoDisplay
 
-Describe your project here!
+Displays item info.
 
 ## Template Instructions
 
-You can remove this section after you've set up your project.
+You can remove this section after you've set up your project. (But I refuse!)
 
 Next steps:
 
