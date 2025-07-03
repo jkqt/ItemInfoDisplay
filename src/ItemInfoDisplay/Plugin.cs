@@ -147,7 +147,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_InflictPoison))
             {
                 Action_InflictPoison effect = (Action_InflictPoison)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, GAIN " + effectColors["Poison"] + ProcessEffectOverTime(effect.poisonPerSecond, effect.inflictionTime, "Poison");
+                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, GAIN " + effectColors["Poison"] + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
             }
             else if (itemComponents[i].GetType() == typeof(Action_ModifyStatus))
             {
@@ -276,10 +276,11 @@ public partial class Plugin : BaseUnityPlugin
                     AOE effect1AOE = effect1.GetComponent<AOE>();
                     GameObject effect2 = effect1.transform.Find("VFX_SporePoisonExplo").gameObject;
                     AOE effect2AOE = effect2.GetComponent<AOE>();
+                    TimeEvent effect2TimeEvent = effect2.GetComponent<TimeEvent>();
                     RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();
                     itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A GAS THAT WILL\n";
                     itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString());
-                    itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString());
+                    itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2TimeEvent.rate, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString());
                 }
                 else if (effect.instantiateOnBreak.name.Equals("ShelfShroomSpawn"))
                 {
@@ -400,7 +401,7 @@ public partial class Plugin : BaseUnityPlugin
         return result;
     }
 
-    private static string ProcessEffectOverTime(float amountPerSecond, float time, string effect)
+    private static string ProcessEffectOverTime(float amountPerSecond, float rate, float time, string effect)
     {
         string result = "";
 
@@ -416,7 +417,7 @@ public partial class Plugin : BaseUnityPlugin
         {
             result += "REMOVE ";
         }
-        result += effectColors[effect] + ((Mathf.Abs(amountPerSecond) * time) * 100f).ToString("F1").Replace(".0", "") + " " + effect.ToUpper() + "</color> OVER " + time.ToString() + "s\n";
+        result += effectColors[effect] + ((Mathf.Abs(amountPerSecond) * time * (1 / rate)) * 100f).ToString("F1").Replace(".0", "") + " " + effect.ToUpper() + "</color> OVER " + time.ToString() + "s\n";
 
         return result;
     }
