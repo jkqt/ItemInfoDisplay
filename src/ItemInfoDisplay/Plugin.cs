@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using TMPro;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace ItemInfoDisplay;
@@ -15,8 +16,7 @@ public partial class Plugin : BaseUnityPlugin
 {
     internal static ManualLogSource Log { get; private set; } = null!;
     private static GUIManager guiManager;
-    private static GameObject itemInfoDisplay;
-    private static TextMeshProUGUI itemInfoDisplayText;
+    private static TextMeshProUGUI itemInfoDisplayTextMesh;
     private static Dictionary<string, string> effectColors = new Dictionary<string, string>();
     private static float lastKnownSinceItemAttach;
     private static bool hasChanged;
@@ -60,16 +60,16 @@ public partial class Plugin : BaseUnityPlugin
                             lastKnownSinceItemAttach = Character.observedCharacter.data.sinceItemAttach;
                         }
 
-                        if (!itemInfoDisplay.activeSelf)
+                        if (!itemInfoDisplayTextMesh.gameObject.activeSelf)
                         {
-                            itemInfoDisplay.SetActive(true);
+                            itemInfoDisplayTextMesh.gameObject.SetActive(true);
                         }
                     }
                     else
                     {
-                        if (itemInfoDisplay.activeSelf) 
+                        if (itemInfoDisplayTextMesh.gameObject.activeSelf) 
                         {
-                            itemInfoDisplay.SetActive(false);
+                            itemInfoDisplayTextMesh.gameObject.SetActive(false);
                         }
                     }
                 }
@@ -83,159 +83,182 @@ public partial class Plugin : BaseUnityPlugin
 
     private static void ProcessItemGameObject()
     {
-        //Log.LogInfo(Character.observedCharacter.data.sinceItemAttach.ToString());
         Item item = Character.observedCharacter.data.currentItem;
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
-        itemInfoDisplayText.text = "";
+        string suffix = effectColors["Weight"] + item.carryWeight.ToString() + " WEIGHT</color>";
+        itemInfoDisplayTextMesh.text = "";
+        itemInfoDisplayTextMesh.text += "12345678901234567890123456789012\n";
         for (int i = 0; i < itemComponents.Length; i++)
         {
-            Log.LogInfo(itemComponents[i]);
-            // turn your eyes away from this massive pile of if else statements
-            if (itemComponents[i].ToString().Contains("Action_ApplyAffliction"))
+            if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
             {
-                itemInfoDisplayText.text += "TODO: Action_ApplyAffliction\n";
+                Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
+                itemInfoDisplayTextMesh.text += ProcessEffect((effect.restorationAmount * -1f), "Hunger");
             }
-            else if (itemComponents[i].ToString().Contains("Action_ApplyAntigrav"))
+            else if (itemComponents[i].GetType() == typeof(Action_GiveExtraStamina))
             {
-                itemInfoDisplayText.text += "TODO: Action_ApplyAntigrav\n";
+                Action_GiveExtraStamina effect = (Action_GiveExtraStamina)itemComponents[i];
+                itemInfoDisplayTextMesh.text += ProcessEffect(effect.amount, "Extra Stamina");
             }
-            else if (itemComponents[i].ToString().Contains("Action_ApplyInfiniteStamina"))
+            else if (itemComponents[i].GetType() == typeof(Action_InflictPoison))
             {
-                itemInfoDisplayText.text += "TODO: Action_ApplyInfiniteStamina\n";
+                Action_InflictPoison effect = (Action_InflictPoison)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, GAIN " + effectColors["Poison"] 
+                    + (effect.poisonPerSecond * effect.inflictionTime * 100f).ToString("F1").Replace(".0", "") + " POISON</color> OVER " 
+                    + effect.inflictionTime.ToString() + "s\n";
             }
-            else if (itemComponents[i].ToString().Contains("Action_ApplyMassAffliction"))
+            else if (itemComponents[i].GetType() == typeof(Action_ModifyStatus))
             {
-                itemInfoDisplayText.text += "TODO: Action_ApplyMassAffliction\n";
+                Action_ModifyStatus effect = (Action_ModifyStatus)itemComponents[i];
+                itemInfoDisplayTextMesh.text += ProcessEffect(effect.changeAmount, effect.statusType.ToString());
             }
-            else if (itemComponents[i].ToString().Contains("Action_ApplySuperJump"))
+            else if (itemComponents[i].GetType() == typeof(Action_ApplyMassAffliction))
             {
-                itemInfoDisplayText.text += "TODO: Action_ApplySuperJump\n";
+                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyMassAffliction\n";
             }
-            else if (itemComponents[i].ToString().Contains("Action_CallScoutmaster"))
+            else if (itemComponents[i].GetType() == typeof(Action_ApplyAffliction))
             {
-                itemInfoDisplayText.text += "TODO: Action_CallScoutmaster\n";
+                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyAffliction\n";
             }
-            else if (itemComponents[i].ToString().Contains("Action_ClearAllStatus"))
+            else if (itemComponents[i].GetType() == typeof(Action_ClearAllStatus))
             {
-                itemInfoDisplayText.text += "TODO: Action_ClearAllStatus\n";
+                Action_ClearAllStatus effect = (Action_ClearAllStatus)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "CLEAR ALL STATUS";
+                if (effect.excludeCurse)
+                {
+                    itemInfoDisplayTextMesh.text += " EXCEPT " + effectColors["Curse"] + "CURSE</color>";
+                }
+                if (effect.otherExclusions.Count > 0)
+                {
+                    foreach (CharacterAfflictions.STATUSTYPE exclusion in effect.otherExclusions)
+                    {
+                        itemInfoDisplayTextMesh.text += ", " + effectColors[exclusion.ToString()] + exclusion.ToString().ToUpper() + "</color>";
+                    }
+                }
+                itemInfoDisplayTextMesh.text += "\n";
             }
-            else if (itemComponents[i].ToString().Contains("Action_ConsumeAndSpawn"))
+            else if (itemComponents[i].GetType() == typeof(Action_ConsumeAndSpawn))
             {
                 Action_ConsumeAndSpawn effect = (Action_ConsumeAndSpawn)itemComponents[i];
                 if (effect.itemToSpawn.ToString().Contains("Peel"))
                 {
-                    itemInfoDisplayText.text += "GAIN A PEEL WHEN EATEN\n";
+                    itemInfoDisplayTextMesh.text += "GAIN A PEEL WHEN EATEN\n";
                 }
                 else
                 {
-                    itemInfoDisplayText.text += "TODO: Action_ConsumeAndSpawn\n";
+                    // not sure if used for items other than berrynanas
+                    itemInfoDisplayTextMesh.text += "TODO: Action_ConsumeAndSpawn\n";
                 }
             }
-            else if (itemComponents[i].ToString().Contains("Action_Consume"))
+            else if (itemComponents[i].GetType() == typeof(Action_ReduceUses))
+            {
+                if (item.totalUses > 1)
+                {
+                    suffix += ", " + item.data.data[DataEntryKey.ItemUses] + " USES";
+                }
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_ApplyInfiniteStamina))
+            {
+                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyInfiniteStamina\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Actions_DefaultConstructActions))
+            {
+                itemInfoDisplayTextMesh.text += "CAN BE PLACED\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_LightLantern))
+            {
+                itemInfoDisplayTextMesh.text += "TODO: Action_LightLantern\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_TootMagicBugle))
+            {
+                itemInfoDisplayTextMesh.text += "TODO: Action_TootMagicBugle\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_Flare))
+            {
+                itemInfoDisplayTextMesh.text += "TODO: Action_Flare\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
+            {
+                itemInfoDisplayTextMesh.text += "TODO: Action_RaycastDart\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_Die))
+            {
+                itemInfoDisplayTextMesh.text += "TODO: Action_Die\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_SpawnGuidebookPage))
+            {
+                itemInfoDisplayTextMesh.text += "CAN BE OPENED\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_Guidebook))
+            {
+                itemInfoDisplayTextMesh.text += "CAN BE READ\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_CallScoutmaster))
+            {
+                itemInfoDisplayTextMesh.text += "BREAK RULE 0\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_MoraleBoost))
+            {
+                itemInfoDisplayTextMesh.text += "TODO: Action_MoraleBoost\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_Passport))
+            {
+                itemInfoDisplayTextMesh.text += "CUSTOMIZE CHARACTER\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_WarpToRandomPlayer))
+            {
+                itemInfoDisplayTextMesh.text += "WARP TO RANDOM PLAYER\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Actions_Binoculars))
+            {
+                itemInfoDisplayTextMesh.text += "USE TO LOOK FURTHER\n";
+            }
+            /*else if (itemComponents[i].GetType() == typeof(Action_OverrideCamera))
+            {
+                //ignore
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_ShowBinocularOverlay))
+            {
+                //ignore
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_Consume))
             {
                 // ignore
             }
-            else if (itemComponents[i].ToString().Contains("Action_Die"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_Die\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_Flare"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_Flare\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_GiveExtraStamina"))
-            {
-                Action_GiveExtraStamina effect = (Action_GiveExtraStamina)itemComponents[i];
-                itemInfoDisplayText.text += ProcessEffect(effect.amount, "Extra Stamina");
-            }
-            else if (itemComponents[i].ToString().Contains("Action_GuidebookScroll"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_GuidebookScroll\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_Guidebook"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_Guidebook\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_InflictPoison"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_InflictPoison\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_LaunchPlayer"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_LaunchPlayer\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_LightLantern"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_LightLantern\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_ModifyStatus"))
-            {
-                Action_ModifyStatus effect = (Action_ModifyStatus)itemComponents[i];
-                itemInfoDisplayText.text += ProcessEffect(effect.changeAmount, effect.statusType.ToString());
-            }
-            else if (itemComponents[i].ToString().Contains("Action_MoraleBoost"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_MoraleBoost\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_OverrideCamera"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_OverrideCamera\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_Passport"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_Passport\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_PlayAnimation"))
+            else if (itemComponents[i].GetType() == typeof(Action_PlayAnimation))
             {
                 // ignore
             }
-            else if (itemComponents[i].ToString().Contains("Action_PlayItemAnimation"))
+            else if (itemComponents[i].GetType() == typeof(Action_GuidebookScroll))
             {
-                itemInfoDisplayText.text += "TODO: Action_PlayItemAnimation\n";
+                // ignore
             }
-            else if (itemComponents[i].ToString().Contains("Action_RaycastDart"))
+            else if (itemComponents[i].GetType() == typeof(Action_PlayItemAnimation))
             {
-                itemInfoDisplayText.text += "TODO: Action_RaycastDart\n";
+                itemInfoDisplayTextMesh.text += "TODO: Action_PlayItemAnimation\n"; // unused afaik
             }
-            else if (itemComponents[i].ToString().Contains("Action_ReduceUses"))
+            else if (itemComponents[i].GetType() == typeof(Action_ApplyAntigrav))
             {
-                itemInfoDisplayText.text += "TODO: Action_ReduceUses\n";
+                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyAntigrav\n"; // unused afaik
             }
-            else if (itemComponents[i].ToString().Contains("Action_RestoreHunger"))
+            else if (itemComponents[i].GetType() == typeof(Action_ApplySuperJump))
             {
-                Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
-                itemInfoDisplayText.text += ProcessEffect((effect.restorationAmount * -1f), "Hunger");
+                itemInfoDisplayTextMesh.text += "TODO: Action_ApplySuperJump\n"; // unused afaik
             }
-            else if (itemComponents[i].ToString().Contains("Action_ShowBinocularOverlay"))
+            else if (itemComponents[i].GetType() == typeof(Action_LaunchPlayer))
             {
-                itemInfoDisplayText.text += "TODO: Action_ShowBinocularOverlay\n";
+                itemInfoDisplayTextMesh.text += "TODO: Action_LaunchPlayer\n"; // unused afaik
             }
-            else if (itemComponents[i].ToString().Contains("Action_SpawnGuidebookPage"))
+            else if (itemComponents[i].GetType() == typeof(Action_Torch))
             {
-                itemInfoDisplayText.text += "TODO: Action_SpawnGuidebookPage\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_TootMagicBugle"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_TootMagicBugle\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_Torch"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_Torch\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Action_WarpToRandomPlayer"))
-            {
-                itemInfoDisplayText.text += "TODO: Action_WarpToRandomPlayer\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Actions_Binoculars"))
-            {
-                itemInfoDisplayText.text += "TODO: Actions_Binoculars\n";
-            }
-            else if (itemComponents[i].ToString().Contains("Actions_DefaultConstructActions"))
-            {
-                itemInfoDisplayText.text += "CAN BE PLACED\n";
-            }
+                itemInfoDisplayTextMesh.text += "TODO: Action_Torch\n"; // unused afaik
+            }*/
         }
+
+
+
+        itemInfoDisplayTextMesh.text += suffix;
     }
 
     private static string ProcessEffect(float amount, string effect)
@@ -254,7 +277,7 @@ public partial class Plugin : BaseUnityPlugin
         {
             result += "Remove ";
         }
-        result += effectColors[effect] + Mathf.Round(Mathf.Abs(amount) * 100f).ToString() + " " + effect + "</color>\n";
+        result += effectColors[effect] + (Mathf.Abs(amount) * 100f).ToString("F1").Replace(".0", "") + " " + effect + "</color>\n";
 
         return result.ToUpper();
     }
@@ -264,42 +287,26 @@ public partial class Plugin : BaseUnityPlugin
         GameObject guiManagerGameObj = GameObject.Find("GAME/GUIManager");
         guiManager = guiManagerGameObj.GetComponent<GUIManager>();
         TMPro.TMP_FontAsset font = guiManager.heroDayText.font;
-        GameObject invGameObj = guiManagerGameObj.transform.Find("Canvas_HUD/Inventory").gameObject;
 
-        itemInfoDisplay = new GameObject("ItemInfoDisplay");
-        itemInfoDisplay.transform.SetParent(invGameObj.transform);
-        RectTransform itemInfoDisplayRect = itemInfoDisplay.AddComponent<RectTransform>();
+        GameObject invGameObj = guiManagerGameObj.transform.Find("Canvas_HUD/Prompts/ItemPromptLayout").gameObject;
+        GameObject itemInfoDisplayGameObj = new GameObject("ItemInfoDisplay");
+        itemInfoDisplayGameObj.transform.SetParent(invGameObj.transform);
+        itemInfoDisplayTextMesh = itemInfoDisplayGameObj.AddComponent<TextMeshProUGUI>();
+        RectTransform itemInfoDisplayRect = itemInfoDisplayGameObj.GetComponent<RectTransform>();
 
-        /*GameObject itemInfoDisplayBackgroundGameObj = new GameObject("Background");
-        itemInfoDisplayBackgroundGameObj.transform.SetParent(itemInfoDisplay.transform);
-        UnityEngine.UI.Image itemInfoDisplayBackgroundImage = itemInfoDisplayBackgroundGameObj.AddComponent<UnityEngine.UI.Image>();
-        RectTransform itemInfoDisplayBackgroundRect = itemInfoDisplayBackgroundGameObj.GetComponent<RectTransform>();*/
+        //itemInfoDisplayRect.offsetMin = new Vector2(0f, 0f);
+        //itemInfoDisplayRect.offsetMax = new Vector2(0f, 0f);
+        //itemInfoDisplayRect.pivot = new Vector2(0.5f, 0.5f);
+        //itemInfoDisplayRect.anchorMax = new Vector2(0f, 0f);
+        //itemInfoDisplayRect.anchorMin = new Vector2(0f, 0f);
+        itemInfoDisplayRect.sizeDelta = new Vector2(500f, 0f);
 
-        GameObject itemInfoDisplayTextGameObj = new GameObject("Text");
-        itemInfoDisplayTextGameObj.transform.SetParent(itemInfoDisplay.transform);
-        itemInfoDisplayText = itemInfoDisplayTextGameObj.AddComponent<TextMeshProUGUI>();
-        RectTransform itemInfoDisplayTextRect = itemInfoDisplayTextGameObj.GetComponent<RectTransform>();
-
-        invGameObj.SetActive(true);
-        itemInfoDisplay.SetActive(true);
-        //itemInfoDisplayBackgroundGameObj.SetActive(true);
-        itemInfoDisplayTextGameObj.SetActive(true);
-
-        itemInfoDisplayRect.sizeDelta = new Vector2(280f, 160f);
-        //itemInfoDisplayBackgroundRect.sizeDelta = new Vector2(280f, 160f);
-        itemInfoDisplayTextRect.sizeDelta = new Vector2(276f, 156f);
-        itemInfoDisplayRect.anchorMin = new Vector2(1f, 0f);
-        itemInfoDisplayRect.anchorMax = new Vector2(1f, 0f);
-        itemInfoDisplayRect.pivot = new Vector2(1f, 0.5f);
-        itemInfoDisplayRect.offsetMin = new Vector2(-750f, 250f);
-        itemInfoDisplayRect.offsetMax = new Vector2(-75f, 320f);
-        //itemInfoDisplayBackgroundImage.color = new Color(0f, 0f, 0f, 0.69f);
-        itemInfoDisplayText.font = font;
-        itemInfoDisplayText.fontSize = 20f;
-        itemInfoDisplayText.alignment = TextAlignmentOptions.BottomLeft;
-        itemInfoDisplayText.lineSpacing = -50f;
-        itemInfoDisplayText.text = "";
-        itemInfoDisplayText.outlineWidth = 0.08f;
+        itemInfoDisplayTextMesh.font = font;
+        itemInfoDisplayTextMesh.fontSize = 20f;
+        itemInfoDisplayTextMesh.alignment = TextAlignmentOptions.BottomLeft;
+        itemInfoDisplayTextMesh.lineSpacing = -50f;
+        itemInfoDisplayTextMesh.text = "";
+        itemInfoDisplayTextMesh.outlineWidth = 0.08f;
     }
     private static void InitEffectColors(Dictionary<string, string> dict)
     {
