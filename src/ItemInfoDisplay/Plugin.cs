@@ -128,7 +128,7 @@ public partial class Plugin : BaseUnityPlugin
         Item item = Character.observedCharacter.data.currentItem;
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
-        string suffixWeight = "\n" + effectColors["Weight"] + item.carryWeight.ToString() + " WEIGHT</color>";
+        string suffixWeight = "\n" + effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
         string suffixUses = "";
         string suffixCooked = "";
         itemInfoDisplayTextMesh.text = "";
@@ -147,9 +147,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_InflictPoison))
             {
                 Action_InflictPoison effect = (Action_InflictPoison)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, GAIN " + effectColors["Poison"] 
-                    + (effect.poisonPerSecond * effect.inflictionTime * 100f).ToString("F1").Replace(".0", "") + " POISON</color> OVER " 
-                    + effect.inflictionTime.ToString() + "s\n";
+                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, GAIN " + effectColors["Poison"] + ProcessEffectOverTime(effect.poisonPerSecond, effect.inflictionTime, "Poison");
             }
             else if (itemComponents[i].GetType() == typeof(Action_ModifyStatus))
             {
@@ -188,11 +186,6 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     itemInfoDisplayTextMesh.text += "GAIN A PEEL WHEN EATEN\n";
                 }
-                /*else
-                {
-                    // not sure if used for items other than berrynanas
-                    itemInfoDisplayTextMesh.text += "TODO: Action_ConsumeAndSpawn\n";
-                }*/
             }
             else if (itemComponents[i].GetType() == typeof(Action_ReduceUses))
             {
@@ -205,10 +198,6 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += "TODO: Action_ApplyInfiniteStamina\n";
             }
-            else if (itemComponents[i].GetType() == typeof(Actions_DefaultConstructActions))
-            {
-                itemInfoDisplayTextMesh.text += "CAN BE PLACED\n";
-            }
             else if (itemComponents[i].GetType() == typeof(Action_LightLantern))
             {
                 itemInfoDisplayTextMesh.text += "TODO: Action_LightLantern\n";
@@ -217,17 +206,97 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += "TODO: Action_TootMagicBugle\n";
             }
-            else if (itemComponents[i].GetType() == typeof(Action_Flare))
-            {
-                itemInfoDisplayTextMesh.text += "TODO: Action_Flare\n";
-            }
             else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
             {
                 itemInfoDisplayTextMesh.text += "TODO: Action_RaycastDart\n";
             }
+            else if (itemComponents[i].GetType() == typeof(ClimbingSpikeComponent))
+            {
+                itemInfoDisplayTextMesh.text += "PLACE A PITON YOU CAN GRAB\nTO " + effectColors["Extra Stamina"] + "REGENERATE STAMINA</color>\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_Flare))
+            {
+                itemInfoDisplayTextMesh.text += "LIGHT TO SIGNAL FOR HELP\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Backpack))
+            {
+                itemInfoDisplayTextMesh.text += "DROP TO PLACE ITEMS INSIDE\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(BananaPeel))
+            {
+                itemInfoDisplayTextMesh.text += "SLIP WHEN STEPPED ON\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Constructable))
+            {
+                Constructable effect = (Constructable)itemComponents[i];
+                if (effect.constructedPrefab.name.Equals("PortableStovetop_Placed"))
+                {
+                    itemInfoDisplayTextMesh.text += "PLACE A " + effectColors["Injury"] + "COOKING</color> STOVE FOR " + effect.constructedPrefab.GetComponent<Campfire>().burnsFor.ToString() + "s\n";
+                }
+                else
+                {
+                    itemInfoDisplayTextMesh.text += "CAN BE PLACED\n";
+                }
+            }
+            else if (itemComponents[i].GetType() == typeof(RopeSpool))
+            {
+                RopeSpool effect = (RopeSpool)itemComponents[i];
+                if (effect.isAntiRope)
+                {
+                    itemInfoDisplayTextMesh.text += "PLACE A ROPE THAT FLOATS UP\n";
+                }
+                else
+                {
+                    itemInfoDisplayTextMesh.text += "PLACE A ROPE THAT DROPS DOWN\n";
+                }
+            }
+            else if (itemComponents[i].GetType() == typeof(RopeShooter))
+            {
+                RopeSpool effect = (RopeSpool)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "SHOOT A ROPE ANCHOR WHICH PLACES\n";
+                if (effect.isAntiRope)
+                {
+                    itemInfoDisplayTextMesh.text += "A ROPE THAT FLOATS UP 5m\n";
+                }
+                else
+                {
+                    itemInfoDisplayTextMesh.text += "A ROPE THAT DROPS DOWN 5m\n";
+                }
+            }
+            else if (itemComponents[i].GetType() == typeof(VineShooter))
+            {
+                itemInfoDisplayTextMesh.text += "SHOOT A CHAIN THAT CONNECTS FROM\nYOUR POSITION TO WHERE YOU SHOOT\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(ShelfShroom))
+            {
+                ShelfShroom effect = (ShelfShroom)itemComponents[i];
+                if (effect.instantiateOnBreak.name.Equals("HealingPuffShroomSpawn"))
+                {
+                    GameObject effect1 = effect.instantiateOnBreak.transform.Find("VFX_SporeHealingExplo").gameObject;
+                    AOE effect1AOE = effect1.GetComponent<AOE>();
+                    GameObject effect2 = effect1.transform.Find("VFX_SporePoisonExplo").gameObject;
+                    AOE effect2AOE = effect2.GetComponent<AOE>();
+                    RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();
+                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A GAS THAT WILL\n";
+                    itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString());
+                    itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString());
+                }
+                else if (effect.instantiateOnBreak.name.Equals("ShelfShroomSpawn"))
+                {
+                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A PLATFORM\n";
+                }
+                else if (effect.instantiateOnBreak.name.Equals("BounceShroomSpawn"))
+                {
+                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A BOUNCE PAD\n";
+                }
+            }
+            else if (itemComponents[i].GetType() == typeof(ScoutEffigy))
+            {
+                itemInfoDisplayTextMesh.text += effectColors["Extra Stamina"] + "REVIVE</color> A DEAD PLAYER\n";
+            }
             else if (itemComponents[i].GetType() == typeof(Action_Die))
             {
-                itemInfoDisplayTextMesh.text += effectColors["Curse"] + "DIE</color> WHEN USED\n";
+                itemInfoDisplayTextMesh.text += "YOU " + effectColors["Curse"] + "DIE</color> WHEN USED\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_SpawnGuidebookPage))
             {
@@ -239,23 +308,35 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_CallScoutmaster))
             {
-                itemInfoDisplayTextMesh.text += "BREAK " + effectColors["Injury"] + "RULE 0</color>\n";
+                itemInfoDisplayTextMesh.text += effectColors["Injury"] + "BREAK RULE 0 WHEN USED</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_MoraleBoost))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_MoraleBoost\n";
+                Action_MoraleBoost effect = (Action_MoraleBoost)itemComponents[i];
+                if (effect.boostRadius < 0)
+                {
+                    itemInfoDisplayTextMesh.text += "GAIN " + effectColors["Extra Stamina"] + (effect.baselineStaminaBoost * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
+                }
+            }
+            else if (itemComponents[i].GetType() == typeof(Breakable))
+            {
+                itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO CRACK OPEN\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(BingBong))
+            {
+                itemInfoDisplayTextMesh.text += "MASCOT OF BING BONG AIRWAYS\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_Passport))
             {
-                itemInfoDisplayTextMesh.text += "USE TO CUSTOMIZE CHARACTER\n";
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_WarpToRandomPlayer))
-            {
-                itemInfoDisplayTextMesh.text += "WARP TO RANDOM PLAYER\n";
+                itemInfoDisplayTextMesh.text += "OPEN TO CUSTOMIZE CHARACTER\n";
             }
             else if (itemComponents[i].GetType() == typeof(Actions_Binoculars))
             {
                 itemInfoDisplayTextMesh.text += "USE TO LOOK FURTHER\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_WarpToRandomPlayer))
+            {
+                itemInfoDisplayTextMesh.text += "WARP TO RANDOM PLAYER\n";
             }
             else if (itemComponents[i].GetType() == typeof(ItemCooking))
             {
@@ -293,49 +374,7 @@ public partial class Plugin : BaseUnityPlugin
                     suffixCooked += "   " + effectColors["Poison"] + itemCooking.timesCookedLocal.ToString() + "x COOKED\nCAN BE COOKED</color>";
                 }
             }
-            /*else if (itemComponents[i].GetType() == typeof(Action_OverrideCamera))
-            {
-                // ignore
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_ShowBinocularOverlay))
-            {
-                // ignore
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_Consume))
-            {
-                // ignore
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_PlayAnimation))
-            {
-                // ignore
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_GuidebookScroll))
-            {
-                // ignore
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_PlayItemAnimation))
-            {
-                // unused?
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_ApplyAntigrav))
-            {
-                // unused?
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_ApplySuperJump))
-            {
-                // unused?
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_LaunchPlayer))
-            {
-                // unused?
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_Torch))
-            {
-                // unused?
-            }*/
         }
-
-
 
         itemInfoDisplayTextMesh.text += suffixWeight + suffixUses + suffixCooked;
     }
@@ -350,15 +389,36 @@ public partial class Plugin : BaseUnityPlugin
         }
         else if (amount > 0)
         {
-            result += "Gain ";
+            result += "GAIN ";
         }
         else if (amount < 0)
         {
-            result += "Remove ";
+            result += "REMOVE ";
         }
-        result += effectColors[effect] + (Mathf.Abs(amount) * 100f).ToString("F1").Replace(".0", "") + " " + effect + "</color>\n";
+        result += effectColors[effect] + (Mathf.Abs(amount) * 100f).ToString("F1").Replace(".0", "") + " " + effect.ToUpper() + "</color>\n";
 
-        return result.ToUpper();
+        return result;
+    }
+
+    private static string ProcessEffectOverTime(float amountPerSecond, float time, string effect)
+    {
+        string result = "";
+
+        if ((amountPerSecond == 0) || (time == 0))
+        {
+            return result;
+        }
+        else if (amountPerSecond > 0)
+        {
+            result += "GAIN ";
+        }
+        else if (amountPerSecond < 0)
+        {
+            result += "REMOVE ";
+        }
+        result += effectColors[effect] + ((Mathf.Abs(amountPerSecond) * time) * 100f).ToString("F1").Replace(".0", "") + " " + effect.ToUpper() + "</color> OVER " + time.ToString() + "s\n";
+
+        return result;
     }
 
     private static void AddDisplayObject()
