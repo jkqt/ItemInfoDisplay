@@ -28,16 +28,20 @@ public partial class Plugin : BaseUnityPlugin
         InitEffectColors(effectColors);
         lastKnownSinceItemAttach = 0f;
         hasChanged = true;
-        forceUpdateTime = 0.5f;
-        Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayCharacterItemsUpdatePatch));
+        forceUpdateTime = 30f;
+        Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayUpdatePatch));
+        Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayEquipPatch));
+        Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayFinishCookingPatch));
+        Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayReduceUsesRPCPatch));
+        //Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayUnequipPatch)); //redundant since character probably equips null
         Log.LogInfo($"Plugin {Name} is loaded!");
     }
 
-    private static class ItemInfoDisplayCharacterItemsUpdatePatch 
+    private static class ItemInfoDisplayUpdatePatch 
     {
         [HarmonyPatch(typeof(CharacterItems), "Update")]
         [HarmonyPostfix]
-        private static void ItemInfoDisplayCharacterItemsUpdate(CharacterItems __instance)
+        private static void ItemInfoDisplayUpdate(CharacterItems __instance)
         {
             try
             {
@@ -51,11 +55,14 @@ public partial class Plugin : BaseUnityPlugin
                     {
                         if (hasChanged)
                         {
+                            Log.LogInfo("ProcessItemGameObject() called at " + Character.observedCharacter.data.sinceItemAttach.ToString() + " sinceItemAttach");
                             hasChanged = false;
                             ProcessItemGameObject();
                         }
-                        else if ((Character.observedCharacter.data.sinceItemAttach == 0) || (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime))
+                        //else if ((Character.observedCharacter.data.sinceItemAttach == 0) || (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime))
+                        else if (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime)
                         {
+                            Log.LogInfo("ProcessItemGameObject() force update called at " + Character.observedCharacter.data.sinceItemAttach.ToString() + " sinceItemAttach");
                             hasChanged = true;
                             lastKnownSinceItemAttach = Character.observedCharacter.data.sinceItemAttach;
                         }
@@ -80,6 +87,62 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
     }
+
+    private static class ItemInfoDisplayEquipPatch
+    {
+        [HarmonyPatch(typeof(CharacterItems), "Equip")]
+        [HarmonyPostfix]
+        private static void ItemInfoDisplayEquip(CharacterItems __instance)
+        {
+            if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
+            {
+                hasChanged = true;
+                Log.LogInfo(Character.observedCharacter.characterName + " has equipped an item.");
+            }
+        }
+    }
+
+    private static class ItemInfoDisplayFinishCookingPatch
+    {
+        [HarmonyPatch(typeof(ItemCooking), "FinishCooking")]
+        [HarmonyPostfix]
+        private static void ItemInfoDisplayFinishCooking(ItemCooking __instance)
+        {
+            if (Character.ReferenceEquals(Character.observedCharacter, __instance.item.holderCharacter))
+            {
+                Log.LogInfo(Character.observedCharacter.characterName + " has cooked an item.");
+                hasChanged = true;
+            }
+        }
+    }
+
+    private static class ItemInfoDisplayReduceUsesRPCPatch
+    {
+        [HarmonyPatch(typeof(Action_ReduceUses), "ReduceUsesRPC")]
+        [HarmonyPostfix]
+        private static void ItemInfoDisplayReduceUsesRPC(Action_ReduceUses __instance)
+        {
+            if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
+            {
+                Log.LogInfo(Character.observedCharacter.characterName + " has used an item charge.");
+                hasChanged = true;
+            }
+        }
+    }
+
+    /*private static class ItemInfoDisplayUnequipPatch
+    {
+        [HarmonyPatch(typeof(CharacterItems), "UnAttatchEquipedItem")]
+        [HarmonyPrefix]
+        private static void ItemInfoDisplayUnequip(CharacterItems __instance)
+        {
+            if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
+            {
+                Log.LogInfo(Character.observedCharacter.characterName + " has unequipped an item.");
+                hasChanged = true;
+            }
+        }
+    }*/
 
     private static void ProcessItemGameObject()
     {
@@ -294,13 +357,7 @@ public partial class Plugin : BaseUnityPlugin
         itemInfoDisplayTextMesh = itemInfoDisplayGameObj.AddComponent<TextMeshProUGUI>();
         RectTransform itemInfoDisplayRect = itemInfoDisplayGameObj.GetComponent<RectTransform>();
 
-        //itemInfoDisplayRect.offsetMin = new Vector2(0f, 0f);
-        //itemInfoDisplayRect.offsetMax = new Vector2(0f, 0f);
-        //itemInfoDisplayRect.pivot = new Vector2(0.5f, 0.5f);
-        //itemInfoDisplayRect.anchorMax = new Vector2(0f, 0f);
-        //itemInfoDisplayRect.anchorMin = new Vector2(0f, 0f);
         itemInfoDisplayRect.sizeDelta = new Vector2(500f, 0f);
-
         itemInfoDisplayTextMesh.font = font;
         itemInfoDisplayTextMesh.fontSize = 20f;
         itemInfoDisplayTextMesh.alignment = TextAlignmentOptions.BottomLeft;
