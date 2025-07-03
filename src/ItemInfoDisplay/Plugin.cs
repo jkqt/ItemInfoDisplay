@@ -57,7 +57,6 @@ public partial class Plugin : BaseUnityPlugin
                             hasChanged = false;
                             ProcessItemGameObject();
                         }
-                        //else if ((Character.observedCharacter.data.sinceItemAttach == 0) || (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime))
                         else if (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime)
                         {
                             hasChanged = true;
@@ -129,9 +128,10 @@ public partial class Plugin : BaseUnityPlugin
         Item item = Character.observedCharacter.data.currentItem;
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
-        string suffix = effectColors["Weight"] + item.carryWeight.ToString() + " WEIGHT</color>";
+        string suffixWeight = "\n" + effectColors["Weight"] + item.carryWeight.ToString() + " WEIGHT</color>";
+        string suffixUses = "";
+        string suffixCooked = "";
         itemInfoDisplayTextMesh.text = "";
-        itemInfoDisplayTextMesh.text += "12345678901234567890123456789012\n";
         for (int i = 0; i < itemComponents.Length; i++)
         {
             if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
@@ -188,17 +188,17 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     itemInfoDisplayTextMesh.text += "GAIN A PEEL WHEN EATEN\n";
                 }
-                else
+                /*else
                 {
                     // not sure if used for items other than berrynanas
                     itemInfoDisplayTextMesh.text += "TODO: Action_ConsumeAndSpawn\n";
-                }
+                }*/
             }
             else if (itemComponents[i].GetType() == typeof(Action_ReduceUses))
             {
                 if (item.totalUses > 1)
                 {
-                    suffix += ", " + item.data.data[DataEntryKey.ItemUses] + " USES";
+                    suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USES";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyInfiniteStamina))
@@ -227,7 +227,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_Die))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_Die\n";
+                itemInfoDisplayTextMesh.text += effectColors["Curse"] + "DIE</color> WHEN USED\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_SpawnGuidebookPage))
             {
@@ -239,7 +239,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_CallScoutmaster))
             {
-                itemInfoDisplayTextMesh.text += "BREAK RULE 0\n";
+                itemInfoDisplayTextMesh.text += "BREAK " + effectColors["Injury"] + "RULE 0</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_MoraleBoost))
             {
@@ -247,7 +247,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_Passport))
             {
-                itemInfoDisplayTextMesh.text += "CUSTOMIZE CHARACTER\n";
+                itemInfoDisplayTextMesh.text += "USE TO CUSTOMIZE CHARACTER\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_WarpToRandomPlayer))
             {
@@ -257,13 +257,49 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += "USE TO LOOK FURTHER\n";
             }
+            else if (itemComponents[i].GetType() == typeof(ItemCooking))
+            {
+                ItemCooking itemCooking = (ItemCooking)itemComponents[i];
+                if (itemCooking.wreckWhenCooked && (itemCooking.timesCookedLocal >= 1))
+                {
+                    suffixCooked += "\n" + effectColors["Curse"] + "BROKEN FROM COOKING</color>";
+                }
+                else if (itemCooking.wreckWhenCooked)
+                {
+                    suffixCooked += "\n" + effectColors["Curse"] + "BREAKS IF COOKED</color>";
+                }
+                else if (itemCooking.timesCookedLocal >= ItemCooking.COOKING_MAX)
+                {
+                    suffixCooked += "   " + effectColors["Curse"] + itemCooking.timesCookedLocal.ToString() + "x COOKED\nCANNOT BE COOKED</color>";
+                }
+                else if (itemCooking.timesCookedLocal == 0)
+                {
+                    suffixCooked += "\n" + effectColors["Extra Stamina"] + "CAN BE COOKED</color>";
+                }
+                else if (itemCooking.timesCookedLocal == 1)
+                {
+                    suffixCooked += "   " + effectColors["Extra Stamina"] + itemCooking.timesCookedLocal.ToString() + "x COOKED</color>\n" + effectColors["Hunger"] + "CAN BE COOKED</color>";
+                }
+                else if (itemCooking.timesCookedLocal == 2)
+                {
+                    suffixCooked += "   " + effectColors["Hunger"] + itemCooking.timesCookedLocal.ToString() + "x COOKED</color>\n" + effectColors["Injury"] + "CAN BE COOKED</color>";
+                }
+                else if (itemCooking.timesCookedLocal == 3)
+                {
+                    suffixCooked += "   " + effectColors["Injury"] + itemCooking.timesCookedLocal.ToString() + "x COOKED</color>\n" + effectColors["Poison"] + "CAN BE COOKED</color>";
+                }
+                else if (itemCooking.timesCookedLocal >= 4)
+                {
+                    suffixCooked += "   " + effectColors["Poison"] + itemCooking.timesCookedLocal.ToString() + "x COOKED\nCAN BE COOKED</color>";
+                }
+            }
             /*else if (itemComponents[i].GetType() == typeof(Action_OverrideCamera))
             {
-                //ignore
+                // ignore
             }
             else if (itemComponents[i].GetType() == typeof(Action_ShowBinocularOverlay))
             {
-                //ignore
+                // ignore
             }
             else if (itemComponents[i].GetType() == typeof(Action_Consume))
             {
@@ -279,29 +315,29 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_PlayItemAnimation))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_PlayItemAnimation\n"; // unused afaik
+                // unused?
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyAntigrav))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyAntigrav\n"; // unused afaik
+                // unused?
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplySuperJump))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_ApplySuperJump\n"; // unused afaik
+                // unused?
             }
             else if (itemComponents[i].GetType() == typeof(Action_LaunchPlayer))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_LaunchPlayer\n"; // unused afaik
+                // unused?
             }
             else if (itemComponents[i].GetType() == typeof(Action_Torch))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_Torch\n"; // unused afaik
+                // unused?
             }*/
         }
 
 
 
-        itemInfoDisplayTextMesh.text += suffix;
+        itemInfoDisplayTextMesh.text += suffixWeight + suffixUses + suffixCooked;
     }
 
     private static string ProcessEffect(float amount, string effect)
