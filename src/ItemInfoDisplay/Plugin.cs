@@ -147,7 +147,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_InflictPoison))
             {
                 Action_InflictPoison effect = (Action_InflictPoison)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, GAIN " + effectColors["Poison"] + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
+                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, " + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
             }
             else if (itemComponents[i].GetType() == typeof(Action_ModifyStatus))
             {
@@ -252,9 +252,9 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(RopeShooter))
             {
-                RopeSpool effect = (RopeSpool)itemComponents[i];
+                RopeShooter effect = (RopeShooter)itemComponents[i];
                 itemInfoDisplayTextMesh.text += "SHOOT A ROPE ANCHOR WHICH PLACES\n";
-                if (effect.isAntiRope)
+                if (effect.ropeAnchorWithRopePref.name.Equals("RopeAnchorForRopeShooterAnti"))
                 {
                     itemInfoDisplayTextMesh.text += "A ROPE THAT FLOATS UP 5m\n";
                 }
@@ -272,15 +272,17 @@ public partial class Plugin : BaseUnityPlugin
                 ShelfShroom effect = (ShelfShroom)itemComponents[i];
                 if (effect.instantiateOnBreak.name.Equals("HealingPuffShroomSpawn"))
                 {
-                    GameObject effect1 = effect.instantiateOnBreak.transform.Find("VFX_SporeHealingExplo").gameObject;
+                    /*GameObject effect1 = effect.instantiateOnBreak.transform.Find("VFX_SporeHealingExplo").gameObject;
                     AOE effect1AOE = effect1.GetComponent<AOE>();
                     GameObject effect2 = effect1.transform.Find("VFX_SporePoisonExplo").gameObject;
                     AOE effect2AOE = effect2.GetComponent<AOE>();
                     TimeEvent effect2TimeEvent = effect2.GetComponent<TimeEvent>();
-                    RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();
+                    RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();*/
                     itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A GAS THAT WILL\n";
-                    itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString());
-                    itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2TimeEvent.rate, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString());
+                    // itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString()); // incorrect?
+                    // itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2TimeEvent.rate, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString()); // incorrect?
+                    itemInfoDisplayTextMesh.text += ProcessEffect(-0.175f, "Injury");
+                    itemInfoDisplayTextMesh.text += ProcessEffectOverTime(-0.025f, 1f, 11f, "Injury");
                 }
                 else if (effect.instantiateOnBreak.name.Equals("ShelfShroomSpawn"))
                 {
