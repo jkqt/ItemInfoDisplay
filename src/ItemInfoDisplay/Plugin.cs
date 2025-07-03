@@ -28,12 +28,11 @@ public partial class Plugin : BaseUnityPlugin
         InitEffectColors(effectColors);
         lastKnownSinceItemAttach = 0f;
         hasChanged = true;
-        forceUpdateTime = 30f;
+        forceUpdateTime = 1f;
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayUpdatePatch));
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayEquipPatch));
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayFinishCookingPatch));
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayReduceUsesRPCPatch));
-        //Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayUnequipPatch)); //redundant since character probably equips null
         Log.LogInfo($"Plugin {Name} is loaded!");
     }
 
@@ -55,14 +54,12 @@ public partial class Plugin : BaseUnityPlugin
                     {
                         if (hasChanged)
                         {
-                            Log.LogInfo("ProcessItemGameObject() called at " + Character.observedCharacter.data.sinceItemAttach.ToString() + " sinceItemAttach");
                             hasChanged = false;
                             ProcessItemGameObject();
                         }
                         //else if ((Character.observedCharacter.data.sinceItemAttach == 0) || (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime))
                         else if (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime)
                         {
-                            Log.LogInfo("ProcessItemGameObject() force update called at " + Character.observedCharacter.data.sinceItemAttach.ToString() + " sinceItemAttach");
                             hasChanged = true;
                             lastKnownSinceItemAttach = Character.observedCharacter.data.sinceItemAttach;
                         }
@@ -97,7 +94,6 @@ public partial class Plugin : BaseUnityPlugin
             if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
             {
                 hasChanged = true;
-                Log.LogInfo(Character.observedCharacter.characterName + " has equipped an item.");
             }
         }
     }
@@ -110,7 +106,6 @@ public partial class Plugin : BaseUnityPlugin
         {
             if (Character.ReferenceEquals(Character.observedCharacter, __instance.item.holderCharacter))
             {
-                Log.LogInfo(Character.observedCharacter.characterName + " has cooked an item.");
                 hasChanged = true;
             }
         }
@@ -124,25 +119,10 @@ public partial class Plugin : BaseUnityPlugin
         {
             if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
             {
-                Log.LogInfo(Character.observedCharacter.characterName + " has used an item charge.");
                 hasChanged = true;
             }
         }
     }
-
-    /*private static class ItemInfoDisplayUnequipPatch
-    {
-        [HarmonyPatch(typeof(CharacterItems), "UnAttatchEquipedItem")]
-        [HarmonyPrefix]
-        private static void ItemInfoDisplayUnequip(CharacterItems __instance)
-        {
-            if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
-            {
-                Log.LogInfo(Character.observedCharacter.characterName + " has unequipped an item.");
-                hasChanged = true;
-            }
-        }
-    }*/
 
     private static void ProcessItemGameObject()
     {
@@ -357,7 +337,7 @@ public partial class Plugin : BaseUnityPlugin
         itemInfoDisplayTextMesh = itemInfoDisplayGameObj.AddComponent<TextMeshProUGUI>();
         RectTransform itemInfoDisplayRect = itemInfoDisplayGameObj.GetComponent<RectTransform>();
 
-        itemInfoDisplayRect.sizeDelta = new Vector2(500f, 0f);
+        itemInfoDisplayRect.sizeDelta = new Vector2(500f, 0f); // Y is 0, otherwise moves other item prompts
         itemInfoDisplayTextMesh.font = font;
         itemInfoDisplayTextMesh.fontSize = 20f;
         itemInfoDisplayTextMesh.alignment = TextAlignmentOptions.BottomLeft;
