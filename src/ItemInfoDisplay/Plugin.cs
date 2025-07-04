@@ -149,7 +149,7 @@ public partial class Plugin : BaseUnityPlugin
         }
         else if (itemGameObj.name.Equals("Shell Big(Clone)"))
         {
-            itemInfoDisplayTextMesh.text += "CAN " + effectColors["Hunger"] + "THROW</color> AT A COCONUT\n";
+            itemInfoDisplayTextMesh.text += "TRY " + effectColors["Hunger"] + "THROWING</color> AT A COCONUT\n";
         }
 
         for (int i = 0; i < itemComponents.Length; i++)
@@ -199,7 +199,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_ClearAllStatus))
             {
                 Action_ClearAllStatus effect = (Action_ClearAllStatus)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "CLEAR ALL STATUS";
+                itemInfoDisplayTextMesh.text += effectColors["ItemInfoDisplayPositive"] + "CLEAR ALL STATUS</color>";
                 if (effect.excludeCurse)
                 {
                     itemInfoDisplayTextMesh.text += " EXCEPT " + effectColors["Curse"] + "CURSE</color>";
@@ -223,13 +223,17 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_ReduceUses))
             {
-                if (item.totalUses > 1)
+                OptionableIntItemData uses = (OptionableIntItemData)item.data.data[DataEntryKey.ItemUses];
+                if (uses.HasData)
                 {
-                    suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USES";
-                }
-                else if (item.totalUses == 1)
-                {
-                    suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USE";
+                    if (uses.Value > 1)
+                    {
+                        suffixUses += "   " + uses.Value + " USES";
+                    }
+                    else if (uses.Value == 1)
+                    {
+                        suffixUses += "   " + uses.Value + " USE";
+                    }
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Lantern))
@@ -288,7 +292,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(BananaPeel))
             {
-                itemInfoDisplayTextMesh.text += "SLIP WHEN STEPPED ON\n";
+                itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "SLIP</color> WHEN STEPPED ON\n";
             }
             else if (itemComponents[i].GetType() == typeof(Constructable))
             {
@@ -380,11 +384,11 @@ public partial class Plugin : BaseUnityPlugin
                 Action_MoraleBoost effect = (Action_MoraleBoost)itemComponents[i];
                 if (effect.boostRadius < 0)
                 {
-                    itemInfoDisplayTextMesh.text += "GAIN " + effectColors["Extra Stamina"] + (effect.baselineStaminaBoost * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
+                    itemInfoDisplayTextMesh.text += effectColors["ItemInfoDisplayPositive"] + "GAIN</color> " + effectColors["Extra Stamina"] + (effect.baselineStaminaBoost * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
                 }
                 else if (effect.boostRadius > 0)
                 {
-                    itemInfoDisplayTextMesh.text += "NEARBY PLAYERS GAIN " + effectColors["Extra Stamina"] + (effect.baselineStaminaBoost * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
+                    itemInfoDisplayTextMesh.text += "<#CCCCCC>NEARBY PLAYERS</color>" + effectColors["ItemInfoDisplayPositive"] + " GAIN</color> " + effectColors["Extra Stamina"] + (effect.baselineStaminaBoost * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Breakable))
@@ -470,11 +474,27 @@ public partial class Plugin : BaseUnityPlugin
         }
         else if (amount > 0)
         {
-            result += "GAIN ";
+            if (effect.Equals("Extra Stamina"))
+            {
+                result += effectColors["ItemInfoDisplayPositive"];
+            }
+            else
+            {
+                result += effectColors["ItemInfoDisplayNegative"];
+            }
+            result += "GAIN</color> ";
         }
         else if (amount < 0)
         {
-            result += "REMOVE ";
+            if (effect.Equals("Extra Stamina"))
+            {
+                result += effectColors["ItemInfoDisplayNegative"];
+            }
+            else
+            {
+                result += effectColors["ItemInfoDisplayPositive"];
+            }
+            result += "REMOVE</color> ";
         }
         result += effectColors[effect] + (Mathf.Abs(amount) * 100f).ToString("F1").Replace(".0", "") + " " + effect.ToUpper() + "</color>\n";
 
@@ -491,11 +511,27 @@ public partial class Plugin : BaseUnityPlugin
         }
         else if (amountPerSecond > 0)
         {
-            result += "GAIN ";
+            if (effect.Equals("Extra Stamina"))
+            {
+                result += effectColors["ItemInfoDisplayPositive"];
+            }
+            else
+            {
+                result += effectColors["ItemInfoDisplayNegative"];
+            }
+            result += "GAIN</color> ";
         }
         else if (amountPerSecond < 0)
         {
-            result += "REMOVE ";
+            if (effect.Equals("Extra Stamina"))
+            {
+                result += effectColors["ItemInfoDisplayNegative"];
+            }
+            else
+            {
+                result += effectColors["ItemInfoDisplayPositive"];
+            }
+            result += "REMOVE</color> ";
         }
         result += effectColors[effect] + ((Mathf.Abs(amountPerSecond) * time * (1 / rate)) * 100f).ToString("F1").Replace(".0", "") + " " + effect.ToUpper() + "</color> OVER " + time.ToString() + "s\n";
 
@@ -509,16 +545,16 @@ public partial class Plugin : BaseUnityPlugin
         if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.FasterBoi)
         {
             Peak.Afflictions.Affliction_FasterBoi effect = (Peak.Afflictions.Affliction_FasterBoi)affliction;
-            result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
-                + Mathf.Round(effect.moveSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS RUN SPEED</color> OR\n"
-                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
-                + Mathf.Round(effect.climbSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS CLIMB SPEED</color>\nAFTERWARDS, GAIN "
-                + effectColors["Drowsy"] + (effect.drowsyOnEnd * 100f).ToString("F1").Replace(".0", "") + " DROWSY</color>\n";
+            result += effectColors["ItemInfoDisplayPositive"] + "GAIN</color> " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " 
+                + effectColors["Extra Stamina"] + Mathf.Round(effect.moveSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS RUN SPEED</color> OR\n"
+                + effectColors["ItemInfoDisplayPositive"] + "GAIN</color> " + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
+                + Mathf.Round(effect.climbSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS CLIMB SPEED</color>\nAFTERWARDS, " + effectColors["ItemInfoDisplayNegative"] 
+                + "GAIN</color> " + effectColors["Drowsy"] + (effect.drowsyOnEnd * 100f).ToString("F1").Replace(".0", "") + " DROWSY</color>\n";
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.ClearAllStatus)
         {
             Peak.Afflictions.Affliction_ClearAllStatus effect = (Peak.Afflictions.Affliction_ClearAllStatus)affliction;
-            result += "CLEAR ALL STATUS";
+            result += effectColors["ItemInfoDisplayPositive"] + "CLEAR ALL STATUS</color>";
             if (effect.excludeCurse)
             {
                 result += " EXCEPT " + effectColors["Curse"] + "CURSE</color>";
@@ -528,20 +564,20 @@ public partial class Plugin : BaseUnityPlugin
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AddBonusStamina)
         {
             Peak.Afflictions.Affliction_AddBonusStamina effect = (Peak.Afflictions.Affliction_AddBonusStamina)affliction;
-            result += "GAIN " + effectColors["Extra Stamina"] + (effect.staminaAmount * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
+            result += effectColors["ItemInfoDisplayPositive"] + "GAIN</color> " + effectColors["Extra Stamina"] + (effect.staminaAmount * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.InfiniteStamina)
         {
             Peak.Afflictions.Affliction_InfiniteStamina effect = (Peak.Afflictions.Affliction_InfiniteStamina)affliction;
             if (effect.climbDelay > 0)
             {
-                result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
-                    + "INFINITE RUN STAMINA</color> OR\nGAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
-                    + "INFINITE CLIMB STAMINA</color>\n";
+                result += effectColors["ItemInfoDisplayPositive"] + "GAIN</color> " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " 
+                    + effectColors["Extra Stamina"] + "INFINITE RUN STAMINA</color> OR\n" + effectColors["ItemInfoDisplayPositive"] + "GAIN</color> " 
+                    + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] + "INFINITE CLIMB STAMINA</color>\n";
             }
             else
             {
-                result += "GAIN " + (effect.totalTime).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] + "INFINITE STAMINA\n";
+                result += effectColors["ItemInfoDisplayPositive"] + "GAIN</color> " + (effect.totalTime).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] + "INFINITE STAMINA\n";
             }
             if (effect.drowsyAffliction != null)
             {
@@ -553,11 +589,27 @@ public partial class Plugin : BaseUnityPlugin
             Peak.Afflictions.Affliction_AdjustStatus effect = (Peak.Afflictions.Affliction_AdjustStatus)affliction;
             if (effect.statusAmount > 0)
             {
-                result += "GAIN ";
+                if (effect.Equals("Extra Stamina"))
+                {
+                    result += effectColors["ItemInfoDisplayPositive"];
+                }
+                else
+                {
+                    result += effectColors["ItemInfoDisplayNegative"];
+                }
+                result += "GAIN</color> ";
             }
             else
             {
-                result += "REMOVE ";
+                if (effect.Equals("Extra Stamina"))
+                {
+                    result += effectColors["ItemInfoDisplayNegative"];
+                }
+                else
+                {
+                    result += effectColors["ItemInfoDisplayPositive"];
+                }
+                result += "REMOVE</color> ";
             }
             result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusAmount) * 100f).ToString("F1").Replace(".0", "")
                 + " " + effect.statusType.ToString().ToUpper() + "</color>\n";
@@ -567,18 +619,34 @@ public partial class Plugin : BaseUnityPlugin
             Peak.Afflictions.Affliction_AdjustStatusOverTime effect = (Peak.Afflictions.Affliction_AdjustStatusOverTime)affliction;
             if (effect.statusPerSecond > 0)
             {
-                result += "GAIN ";
+                if (effect.Equals("Extra Stamina"))
+                {
+                    result += effectColors["ItemInfoDisplayPositive"];
+                }
+                else
+                {
+                    result += effectColors["ItemInfoDisplayNegative"];
+                }
+                result += "GAIN</color> ";
             }
             else
             {
-                result += "REMOVE ";
+                if (effect.Equals("Extra Stamina"))
+                {
+                    result += effectColors["ItemInfoDisplayNegative"];
+                }
+                else
+                {
+                    result += effectColors["ItemInfoDisplayPositive"];
+                }
+                result += "REMOVE</color> ";
             }
             result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "") 
                 + " " + effect.statusType.ToString().ToUpper() + "</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Chaos)
         {
-            result += "CLEAR ALL STATUS, THEN RANDOMIZE\n" + effectColors["Hunger"] + "HUNGER</color>, "
+            result += effectColors["ItemInfoDisplayPositive"] + "CLEAR ALL STATUS</color>, THEN RANDOMIZE\n" + effectColors["Hunger"] + "HUNGER</color>, "
                 + effectColors["Extra Stamina"] + "EXTRA STAMINA</color>, " + effectColors["Injury"] + "INJURY</color>,\n" + effectColors["Poison"] + "POISON</color>, "
                 + effectColors["Cold"] + "COLD</color>, " + effectColors["Hot"] + "HEAT</color>, " + effectColors["Drowsy"] + "DROWSY</color>\n";
         }
@@ -602,7 +670,7 @@ public partial class Plugin : BaseUnityPlugin
         itemInfoDisplayTextMesh = itemInfoDisplayGameObj.AddComponent<TextMeshProUGUI>();
         RectTransform itemInfoDisplayRect = itemInfoDisplayGameObj.GetComponent<RectTransform>();
 
-        itemInfoDisplayRect.sizeDelta = new Vector2(500f, 0f); // Y is 0, otherwise moves other item prompts
+        itemInfoDisplayRect.sizeDelta = new Vector2(550f, 0f); // Y is 0, otherwise moves other item prompts
         itemInfoDisplayTextMesh.font = font;
         itemInfoDisplayTextMesh.fontSize = 20f;
         itemInfoDisplayTextMesh.alignment = TextAlignmentOptions.BottomLeft;
@@ -624,5 +692,8 @@ public partial class Plugin : BaseUnityPlugin
         dict.Add("Drowsy", "<#FF5CA4>");
         dict.Add("Curse", "<#1B0043>");
         dict.Add("Weight", "<#A65A1C>");
+
+        dict.Add("ItemInfoDisplayPositive", "<#DDFFDD>");
+        dict.Add("ItemInfoDisplayNegative", "<#FFCCCC>");
     }
 }

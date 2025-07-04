@@ -7,8 +7,8 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "jkqt"
 name = "ItemInfoDisplay"
-description = "TODO: Fill in short mod description."
-websiteUrl = "" # TODO: Add a link to your mod repository here (optional)
+description = "Displays item information to the left of item prompts."
+websiteUrl = "https://github.com/jkqt/ItemInfoDisplay"
 containsNsfwContent = false
 
 [package.dependencies]
