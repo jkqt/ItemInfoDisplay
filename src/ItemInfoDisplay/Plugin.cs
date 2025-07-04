@@ -87,9 +87,16 @@ public partial class Plugin : BaseUnityPlugin
         [HarmonyPostfix]
         private static void ItemInfoDisplayEquip(CharacterItems __instance)
         {
-            if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
+            try
             {
-                hasChanged = true;
+                if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
+                {
+                    hasChanged = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.LogError(e.Message + e.StackTrace);
             }
         }
     }
@@ -100,9 +107,16 @@ public partial class Plugin : BaseUnityPlugin
         [HarmonyPostfix]
         private static void ItemInfoDisplayFinishCooking(ItemCooking __instance)
         {
-            if (Character.ReferenceEquals(Character.observedCharacter, __instance.item.holderCharacter))
+            try
             {
-                hasChanged = true;
+                if (Character.ReferenceEquals(Character.observedCharacter, __instance.item.holderCharacter))
+                {
+                    hasChanged = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.LogError(e.Message + e.StackTrace);
             }
         }
     }
@@ -113,9 +127,16 @@ public partial class Plugin : BaseUnityPlugin
         [HarmonyPostfix]
         private static void ItemInfoDisplayReduceUsesRPC(Action_ReduceUses __instance)
         {
-            if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
+            try
             {
-                hasChanged = true;
+                if (Character.ReferenceEquals(Character.observedCharacter, __instance.character))
+                {
+                    hasChanged = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.LogError(e.Message + e.StackTrace);
             }
         }
     }
