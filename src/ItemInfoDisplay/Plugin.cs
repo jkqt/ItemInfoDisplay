@@ -1,13 +1,9 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using Steamworks;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using TMPro;
-using Unity.Jobs;
 using UnityEngine;
 
 namespace ItemInfoDisplay;
