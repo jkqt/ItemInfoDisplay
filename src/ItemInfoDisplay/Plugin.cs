@@ -18,10 +18,10 @@ public partial class Plugin : BaseUnityPlugin
     private static Dictionary<string, string> effectColors = new Dictionary<string, string>();
     private static float lastKnownSinceItemAttach;
     private static bool hasChanged;
-    private static float forceUpdateTime;
     private static ConfigEntry<float> configFontSize;
     private static ConfigEntry<float> configOutlineWidth;
     private static ConfigEntry<float> configSizeDeltaX;
+    private static ConfigEntry<float> configForceUpdateTime;
 
     private void Awake()
     {
@@ -29,10 +29,10 @@ public partial class Plugin : BaseUnityPlugin
         InitEffectColors(effectColors);
         lastKnownSinceItemAttach = 0f;
         hasChanged = true;
-        forceUpdateTime = 1f;
         configFontSize = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Font Size", 20f, "Customize the Font Size for description text.");
         configOutlineWidth = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Outline Width", 0.08f, "Customize the Outline Width for item description text.");
-        configSizeDeltaX = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Size Delta X", 550f, "Increasing moves text left, decreasing moves text right.");
+        configSizeDeltaX = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Size Delta X", 550f, "Customize the horizontal length of the container for the mod. Increasing moves text left, decreasing moves text right.");
+        configForceUpdateTime = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Force Update Time", 1f, "Customize the time in seconds until the mod forces an update for the item.");
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayUpdatePatch));
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayEquipPatch));
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayFinishCookingPatch));
@@ -61,7 +61,7 @@ public partial class Plugin : BaseUnityPlugin
                             hasChanged = false;
                             ProcessItemGameObject();
                         }
-                        else if (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= forceUpdateTime)
+                        else if (Mathf.Abs(Character.observedCharacter.data.sinceItemAttach - lastKnownSinceItemAttach) >= configForceUpdateTime.Value)
                         {
                             hasChanged = true;
                             lastKnownSinceItemAttach = Character.observedCharacter.data.sinceItemAttach;
@@ -441,7 +441,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(MagicBean))
             {
-                itemInfoDisplayTextMesh.text += "DROP TO GROW A VINE THAT GROWS\nPERPENDICULAR TO TERRAIN UP TO\n10.0m OR UNTIL IT HITS SOMETHING\n";
+                itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO PLANT A VINE THAT GROWS\nPERPENDICULAR TO TERRAIN UP TO\n10.0m OR UNTIL IT HITS SOMETHING\n";
             }
             else if (itemComponents[i].GetType() == typeof(BingBong))
             {
