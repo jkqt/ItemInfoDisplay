@@ -1,4 +1,5 @@
 ﻿using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
 using HarmonyLib;
 using System;
@@ -18,6 +19,9 @@ public partial class Plugin : BaseUnityPlugin
     private static float lastKnownSinceItemAttach;
     private static bool hasChanged;
     private static float forceUpdateTime;
+    private static ConfigEntry<float> configFontSize;
+    private static ConfigEntry<float> configOutlineWidth;
+    private static ConfigEntry<float> configSizeDeltaX;
 
     private void Awake()
     {
@@ -26,6 +30,9 @@ public partial class Plugin : BaseUnityPlugin
         lastKnownSinceItemAttach = 0f;
         hasChanged = true;
         forceUpdateTime = 1f;
+        configFontSize = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Font Size", 20f, "Customize the Font Size for description text.");
+        configOutlineWidth = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Outline Width", 0.08f, "Customize the Outline Width for item description text.");
+        configSizeDeltaX = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Size Delta X", 550f, "Increasing moves text left, decreasing moves text right.");
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayUpdatePatch));
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayEquipPatch));
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayFinishCookingPatch));
@@ -736,13 +743,13 @@ public partial class Plugin : BaseUnityPlugin
         itemInfoDisplayTextMesh = itemInfoDisplayGameObj.AddComponent<TextMeshProUGUI>();
         RectTransform itemInfoDisplayRect = itemInfoDisplayGameObj.GetComponent<RectTransform>();
 
-        itemInfoDisplayRect.sizeDelta = new Vector2(550f, 0f); // Y is 0, otherwise moves other item prompts
+        itemInfoDisplayRect.sizeDelta = new Vector2(configSizeDeltaX.Value, 0f); // Y is 0, otherwise moves other item prompts
         itemInfoDisplayTextMesh.font = font;
-        itemInfoDisplayTextMesh.fontSize = 20f;
+        itemInfoDisplayTextMesh.fontSize = configFontSize.Value;
         itemInfoDisplayTextMesh.alignment = TextAlignmentOptions.BottomLeft;
         itemInfoDisplayTextMesh.lineSpacing = -50f;
         itemInfoDisplayTextMesh.text = "";
-        itemInfoDisplayTextMesh.outlineWidth = 0.08f;
+        itemInfoDisplayTextMesh.outlineWidth = configOutlineWidth.Value;
     }
     private static void InitEffectColors(Dictionary<string, string> dict)
     {

@@ -7,7 +7,7 @@ repository = "https://thunderstore.io"
 [package]
 namespace = "jkqt"
 name = "ItemInfoDisplay"
-description = "Displays item information to the left of item prompts."
+description = "Displays item information."
 websiteUrl = "https://github.com/jkqt/ItemInfoDisplay"
 containsNsfwContent = false
 
