@@ -456,17 +456,14 @@ public partial class Plugin : BaseUnityPlugin
 
         if (prefixStatus.Length > 0)
         {
-            itemInfoDisplayTextMesh.text = prefixStatus + itemInfoDisplayTextMesh.text + "\n";
+            itemInfoDisplayTextMesh.text = prefixStatus + "\n" + itemInfoDisplayTextMesh.text;
         }
         if (suffixAfflictions.Length > 0)
         {
             itemInfoDisplayTextMesh.text += "\n" + suffixAfflictions;
         }
-        if (itemInfoDisplayTextMesh.text.Length == 0)
-        {
-            itemInfoDisplayTextMesh.text += "???\n";
-        }
         itemInfoDisplayTextMesh.text += "\n" + suffixWeight + suffixUses + suffixCooked;
+        itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Replace("\n\n\n", "\n\n");
     }
 
     private static string ProcessEffect(float amount, string effect)
@@ -619,7 +616,35 @@ public partial class Plugin : BaseUnityPlugin
             result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusAmount) * 100f).ToString("F1").Replace(".0", "")
                 + " " + effect.statusType.ToString().ToUpper() + "</color>\n";
         }
-        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatusOverTime)
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.DrowsyOverTime)
+        {
+            Peak.Afflictions.Affliction_AdjustDrowsyOverTime effect = (Peak.Afflictions.Affliction_AdjustDrowsyOverTime)affliction;
+            if (effect.statusPerSecond > 0)
+            {
+                result += effectColors["ItemInfoDisplayNegative"] + "GAIN</color> ";
+            }
+            else
+            {
+                result += effectColors["ItemInfoDisplayPositive"] + "REMOVE</color> ";
+            }
+            result += effectColors["Drowsy"] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "")
+                + " DROWSY</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.ColdOverTime)
+        {
+            Peak.Afflictions.Affliction_AdjustColdOverTime effect = (Peak.Afflictions.Affliction_AdjustColdOverTime)affliction;
+            if (effect.statusPerSecond > 0)
+            {
+                result += effectColors["ItemInfoDisplayNegative"] + "GAIN</color> ";
+            }
+            else
+            {
+                result += effectColors["ItemInfoDisplayPositive"] + "REMOVE</color> ";
+            }
+            result += effectColors["Cold"] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "")
+                + " COLD</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
+        }
+        /*else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatusOverTime)
         {
             Peak.Afflictions.Affliction_AdjustStatusOverTime effect = (Peak.Afflictions.Affliction_AdjustStatusOverTime)affliction;
             if (effect.statusPerSecond > 0)
@@ -648,7 +673,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "") 
                 + " " + effect.statusType.ToString().ToUpper() + "</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
-        }
+        }*/
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Chaos)
         {
             result += effectColors["ItemInfoDisplayPositive"] + "CLEAR ALL STATUS</color>, THEN RANDOMIZE\n" + effectColors["Hunger"] + "HUNGER</color>, "
