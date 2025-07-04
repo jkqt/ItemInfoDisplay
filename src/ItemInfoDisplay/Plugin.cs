@@ -132,6 +132,7 @@ public partial class Plugin : BaseUnityPlugin
         string suffixWeight = "\n" + effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
         string suffixUses = "";
         string suffixCooked = "";
+        string suffixAfflictions = "";
         itemInfoDisplayTextMesh.text = "";
 
         if (itemGameObj.name.Equals("Bugle(Clone)"))
@@ -180,21 +181,25 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_ApplyMassAffliction))
             {
                 Action_ApplyMassAffliction effect = (Action_ApplyMassAffliction)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "NEARBY PLAYERS WILL RECEIVE:\n";
-                itemInfoDisplayTextMesh.text += ProcessAffliction(effect.affliction);
+                suffixAfflictions += "<#CCCCCC>NEARBY PLAYERS WILL RECEIVE:</color>\n";
+                suffixAfflictions += ProcessAffliction(effect.affliction);
                 if (effect.extraAfflictions.Length > 0)
                 {
                     for (int j = 0; j < effect.extraAfflictions.Length; j++)
                     {
-                        itemInfoDisplayTextMesh.text += ",\n" + ProcessAffliction(effect.extraAfflictions[j]);
+                        if (suffixAfflictions.EndsWith('\n'))
+                        {
+                            suffixAfflictions = suffixAfflictions.Remove(suffixAfflictions.Length - 1);
+                        }
+                        suffixAfflictions += ",\n" + ProcessAffliction(effect.extraAfflictions[j]);
                     }
                 }
-                itemInfoDisplayTextMesh.text += "\n";
+                suffixAfflictions += "\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyAffliction))
             {
                 Action_ApplyAffliction effect = (Action_ApplyAffliction)itemComponents[i];
-                itemInfoDisplayTextMesh.text += ProcessAffliction(effect.affliction);
+                suffixAfflictions += ProcessAffliction(effect.affliction);
             }
             else if (itemComponents[i].GetType() == typeof(Action_ClearAllStatus))
             {
@@ -248,11 +253,17 @@ public partial class Plugin : BaseUnityPlugin
             {
                 Action_RaycastDart effect = (Action_RaycastDart)itemComponents[i];
                 itemInfoDisplayTextMesh.text += "SHOOT A DART THAT WILL APPLY:\n";
+                Log.LogInfo("DART # AFFLICTIONS: " + effect.afflictionsOnHit.Length.ToString());
                 for (int j = 0; j < effect.afflictionsOnHit.Length; j++)
                 {
-                    itemInfoDisplayTextMesh.text += ProcessAffliction(effect.afflictionsOnHit[j]) + ", \n";
+                    Log.LogInfo("DART AFFLICTION: " + effect.afflictionsOnHit[j].GetAfflictionType().ToString());
+                    itemInfoDisplayTextMesh.text += ProcessAffliction(effect.afflictionsOnHit[j]) + ",\n";
                 }
-                itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Remove(itemInfoDisplayTextMesh.text.Length - 4) + "\n\n";
+                if (itemInfoDisplayTextMesh.text.EndsWith('\n'))
+                {
+                    itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Remove(itemInfoDisplayTextMesh.text.Length - 2);
+                }
+                itemInfoDisplayTextMesh.text += "\n\n";
             }
             else if (itemComponents[i].GetType() == typeof(ClimbingSpikeComponent))
             {
@@ -431,7 +442,8 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
 
-        itemInfoDisplayTextMesh.text += suffixWeight + suffixUses + suffixCooked;
+        itemInfoDisplayTextMesh.text += "\n" + suffixAfflictions + "\n" + suffixWeight + suffixUses + suffixCooked;
+        itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Replace("\n\n\n", "\n\n");
     }
 
     private static string ProcessEffect(float amount, string effect)
@@ -522,6 +534,20 @@ public partial class Plugin : BaseUnityPlugin
                 result += "AFTERWARDS, " + ProcessAffliction(effect.drowsyAffliction);
             }
         }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatus)
+        {
+            Peak.Afflictions.Affliction_AdjustStatus effect = (Peak.Afflictions.Affliction_AdjustStatus)affliction;
+            if (effect.statusAmount > 0)
+            {
+                result += "GAIN ";
+            }
+            else
+            {
+                result += "REMOVE ";
+            }
+            result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusAmount) * 100f).ToString("F1").Replace(".0", "")
+                + " " + effect.statusType.ToString().ToUpper() + "</color>\n";
+        }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatusOverTime)
         {
             Peak.Afflictions.Affliction_AdjustStatusOverTime effect = (Peak.Afflictions.Affliction_AdjustStatusOverTime)affliction;
@@ -534,7 +560,7 @@ public partial class Plugin : BaseUnityPlugin
                 result += "REMOVE ";
             }
             result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "") 
-                + " " + effect.statusType.ToString() + "</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
+                + " " + effect.statusType.ToString().ToUpper() + "</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Chaos)
         {
