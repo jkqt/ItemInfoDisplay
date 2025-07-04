@@ -8,7 +8,7 @@ Displays:
 - Weight
 - Remaining Item Uses
 - Cookability
-- # Times Cooked
+- Number of Times Cooked
 - Some Effects & Afflictions
 
 This mod is mainly for getting the numbers on consumable items.
