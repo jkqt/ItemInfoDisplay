@@ -485,7 +485,7 @@ public partial class Plugin : BaseUnityPlugin
             Peak.Afflictions.Affliction_FasterBoi effect = (Peak.Afflictions.Affliction_FasterBoi)affliction;
             result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
                 + Mathf.Round(effect.moveSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS RUN SPEED</color> OR\n"
-                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s of " + effectColors["ExtraStamina"] 
+                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s of " + effectColors["Extra Stamina"] 
                 + Mathf.Round(effect.climbSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS CLIMB SPEED</color>\nAFTERWARDS, GAIN "
                 + effectColors["Drowsy"] + (effect.drowsyOnEnd * 100f).ToString("F1").Replace(".0", "") + " DROWSY</color>\n";
         }
@@ -502,7 +502,7 @@ public partial class Plugin : BaseUnityPlugin
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AddBonusStamina)
         {
             Peak.Afflictions.Affliction_AddBonusStamina effect = (Peak.Afflictions.Affliction_AddBonusStamina)affliction;
-            result += "GAIN " + effectColors["ExtraStamina"] + (effect.staminaAmount * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
+            result += "GAIN " + effectColors["Extra Stamina"] + (effect.staminaAmount * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.InfiniteStamina)
         {
@@ -539,7 +539,7 @@ public partial class Plugin : BaseUnityPlugin
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Chaos)
         {
             result += "CLEAR ALL STATUS, THEN RANDOMIZE\n" + effectColors["Hunger"] + "HUNGER</color>, "
-                + effectColors["ExtraStamina"] + "EXTRA STAMINA</color>, " + effectColors["Injury"] + "INJURY</color>,\n" + effectColors["Poison"] + "POISON</color>, "
+                + effectColors["Extra Stamina"] + "EXTRA STAMINA</color>, " + effectColors["Injury"] + "INJURY</color>,\n" + effectColors["Poison"] + "POISON</color>, "
                 + effectColors["Cold"] + "COLD</color>, " + effectColors["Hot"] + "HEAT</color>, " + effectColors["Drowsy"] + "DROWSY</color>\n";
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Glowing)
