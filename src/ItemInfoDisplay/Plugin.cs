@@ -151,10 +151,6 @@ public partial class Plugin : BaseUnityPlugin
         {
             itemInfoDisplayTextMesh.text += "CAN " + effectColors["Hunger"] + "THROW</color> AT A COCONUT\n";
         }
-        else if (itemGameObj.name.Equals("Megaphone(Clone)"))
-        {
-            itemInfoDisplayTextMesh.text += "???\n";
-        }
 
         for (int i = 0; i < itemComponents.Length; i++)
         {
@@ -215,7 +211,7 @@ public partial class Plugin : BaseUnityPlugin
                         itemInfoDisplayTextMesh.text += ", " + effectColors[exclusion.ToString()] + exclusion.ToString().ToUpper() + "</color>";
                     }
                 }
-                itemInfoDisplayTextMesh.text += "\n";
+                itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Replace(", <#E13542>CRAB</color>", "") + "\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_ConsumeAndSpawn))
             {
@@ -247,7 +243,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
             {
                 Action_RaycastDart effect = (Action_RaycastDart)itemComponents[i];
-                suffixAfflictions += "SHOOT A DART THAT WILL APPLY:\n";
+                suffixAfflictions += "<#CCCCCC>SHOOT A DART THAT WILL APPLY:</color>\n";
                 for (int j = 0; j < effect.afflictionsOnHit.Length; j++)
                 {
                     suffixAfflictions += ProcessAffliction(effect.afflictionsOnHit[j]);
@@ -331,7 +327,7 @@ public partial class Plugin : BaseUnityPlugin
                     AOE effect2AOE = effect2.GetComponent<AOE>();
                     TimeEvent effect2TimeEvent = effect2.GetComponent<TimeEvent>();
                     RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();*/
-                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A GAS THAT WILL\n";
+                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO RELEASE GAS THAT WILL\n";
                     // itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString()); // incorrect? calculates strangely
                     // itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2TimeEvent.rate, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString()); // incorrect?
                     itemInfoDisplayTextMesh.text += ProcessEffect(-0.175f, "Injury");
@@ -364,7 +360,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_CallScoutmaster))
             {
-                itemInfoDisplayTextMesh.text += effectColors["Injury"] + "BREAK RULE 0 WHEN USED</color>\n";
+                itemInfoDisplayTextMesh.text += effectColors["Injury"] + "BREAKS RULE 0 WHEN USED</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_MoraleBoost))
             {
@@ -440,12 +436,15 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
 
-        if(suffixAfflictions.Length > 0)
+        if (itemInfoDisplayTextMesh.text.Length == 0)
+        {
+            itemInfoDisplayTextMesh.text += "???\n";
+        }
+        if (suffixAfflictions.Length > 0)
         {
             itemInfoDisplayTextMesh.text += "\n" + suffixAfflictions;
         }
         itemInfoDisplayTextMesh.text += "\n" + suffixWeight + suffixUses + suffixCooked;
-        //itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Replace("\n\n\n", "\n\n");
     }
 
     private static string ProcessEffect(float amount, string effect)
@@ -499,7 +498,7 @@ public partial class Plugin : BaseUnityPlugin
             Peak.Afflictions.Affliction_FasterBoi effect = (Peak.Afflictions.Affliction_FasterBoi)affliction;
             result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
                 + Mathf.Round(effect.moveSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS RUN SPEED</color> OR\n"
-                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s of " + effectColors["Extra Stamina"] 
+                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
                 + Mathf.Round(effect.climbSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS CLIMB SPEED</color>\nAFTERWARDS, GAIN "
                 + effectColors["Drowsy"] + (effect.drowsyOnEnd * 100f).ToString("F1").Replace(".0", "") + " DROWSY</color>\n";
         }
