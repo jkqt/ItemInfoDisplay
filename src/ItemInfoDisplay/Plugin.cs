@@ -129,7 +129,7 @@ public partial class Plugin : BaseUnityPlugin
         Item item = Character.observedCharacter.data.currentItem;
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
-        string suffixWeight = "\n" + effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
+        string suffixWeight = effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
         string suffixUses = "";
         string suffixCooked = "";
         string suffixAfflictions = "";
@@ -194,7 +194,6 @@ public partial class Plugin : BaseUnityPlugin
                         suffixAfflictions += ",\n" + ProcessAffliction(effect.extraAfflictions[j]);
                     }
                 }
-                suffixAfflictions += "\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyAffliction))
             {
@@ -237,10 +236,6 @@ public partial class Plugin : BaseUnityPlugin
                     suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USE";
                 }
             }
-            /*else if (itemComponents[i].GetType() == typeof(Action_ApplyInfiniteStamina))
-            {
-                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyInfiniteStamina\n";
-            }*/
             else if (itemComponents[i].GetType() == typeof(Action_LightLantern))
             {
                 itemInfoDisplayTextMesh.text += "TODO: Action_LightLantern\n";
@@ -252,18 +247,21 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
             {
                 Action_RaycastDart effect = (Action_RaycastDart)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "SHOOT A DART THAT WILL APPLY:\n";
-                Log.LogInfo("DART # AFFLICTIONS: " + effect.afflictionsOnHit.Length.ToString());
+                suffixAfflictions += "SHOOT A DART THAT WILL APPLY:\n";
                 for (int j = 0; j < effect.afflictionsOnHit.Length; j++)
                 {
-                    Log.LogInfo("DART AFFLICTION: " + effect.afflictionsOnHit[j].GetAfflictionType().ToString());
-                    itemInfoDisplayTextMesh.text += ProcessAffliction(effect.afflictionsOnHit[j]) + ",\n";
+                    suffixAfflictions += ProcessAffliction(effect.afflictionsOnHit[j]);
+                    if (suffixAfflictions.EndsWith('\n'))
+                    {
+                        suffixAfflictions = suffixAfflictions.Remove(suffixAfflictions.Length - 1);
+                    }
+                    suffixAfflictions += ",\n";
                 }
-                if (itemInfoDisplayTextMesh.text.EndsWith('\n'))
+                if (suffixAfflictions.EndsWith('\n'))
                 {
-                    itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Remove(itemInfoDisplayTextMesh.text.Length - 2);
+                    suffixAfflictions = suffixAfflictions.Remove(suffixAfflictions.Length - 2);
                 }
-                itemInfoDisplayTextMesh.text += "\n\n";
+                suffixAfflictions += "\n";
             }
             else if (itemComponents[i].GetType() == typeof(ClimbingSpikeComponent))
             {
@@ -442,8 +440,12 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
 
-        itemInfoDisplayTextMesh.text += "\n" + suffixAfflictions + "\n" + suffixWeight + suffixUses + suffixCooked;
-        itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Replace("\n\n\n", "\n\n");
+        if(suffixAfflictions.Length > 0)
+        {
+            itemInfoDisplayTextMesh.text += "\n" + suffixAfflictions;
+        }
+        itemInfoDisplayTextMesh.text += "\n" + suffixWeight + suffixUses + suffixCooked;
+        //itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Replace("\n\n\n", "\n\n");
     }
 
     private static string ProcessEffect(float amount, string effect)
