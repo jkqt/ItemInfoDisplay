@@ -132,6 +132,28 @@ public partial class Plugin : BaseUnityPlugin
         string suffixUses = "";
         string suffixCooked = "";
         itemInfoDisplayTextMesh.text = "";
+
+        if (itemGameObj.name.Equals("Bugle(Clone)"))
+        {
+            itemInfoDisplayTextMesh.text += "CAN BE PLAYED\n";
+        }
+        else if (itemGameObj.name.Equals("Pirate Compass(Clone)"))
+        {
+            itemInfoDisplayTextMesh.text += "POINTS TO THE NEAREST LUGGAGE\n";
+        }
+        else if (itemGameObj.name.Equals("Compass(Clone)"))
+        {
+            itemInfoDisplayTextMesh.text += "POINTS NORTH\n";
+        }
+        else if (itemGameObj.name.Equals("Shell Big(Clone)"))
+        {
+            itemInfoDisplayTextMesh.text += "CAN " + effectColors["Hunger"] + "THROW</color> AT A COCONUT\n";
+        }
+        else if (itemGameObj.name.Equals("Megaphone(Clone)"))
+        {
+            itemInfoDisplayTextMesh.text += "???\n";
+        }
+
         for (int i = 0; i < itemComponents.Length; i++)
         {
             if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
@@ -184,7 +206,7 @@ public partial class Plugin : BaseUnityPlugin
                 Action_ConsumeAndSpawn effect = (Action_ConsumeAndSpawn)itemComponents[i];
                 if (effect.itemToSpawn.ToString().Contains("Peel"))
                 {
-                    itemInfoDisplayTextMesh.text += "GAIN A PEEL WHEN EATEN\n";
+                    itemInfoDisplayTextMesh.text += "<#CCCCCC>GAIN A PEEL WHEN EATEN</color>\n";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Action_ReduceUses))
@@ -192,6 +214,10 @@ public partial class Plugin : BaseUnityPlugin
                 if (item.totalUses > 1)
                 {
                     suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USES";
+                }
+                else if (item.totalUses == 1)
+                {
+                    suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USE";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyInfiniteStamina))
@@ -216,7 +242,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_Flare))
             {
-                itemInfoDisplayTextMesh.text += "LIGHT TO SIGNAL FOR HELP\n";
+                itemInfoDisplayTextMesh.text += "CAN BE LIT\n";
             }
             else if (itemComponents[i].GetType() == typeof(Backpack))
             {
@@ -247,7 +273,7 @@ public partial class Plugin : BaseUnityPlugin
                 }
                 else
                 {
-                    itemInfoDisplayTextMesh.text += "PLACE A ROPE THAT DROPS DOWN\n";
+                    itemInfoDisplayTextMesh.text += "PLACE A ROPE\n";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(RopeShooter))
@@ -256,11 +282,11 @@ public partial class Plugin : BaseUnityPlugin
                 itemInfoDisplayTextMesh.text += "SHOOT A ROPE ANCHOR WHICH PLACES\n";
                 if (effect.ropeAnchorWithRopePref.name.Equals("RopeAnchorForRopeShooterAnti"))
                 {
-                    itemInfoDisplayTextMesh.text += "A ROPE THAT FLOATS UP 5m\n";
+                    itemInfoDisplayTextMesh.text += "A ROPE THAT FLOATS UP 5.0m\n";
                 }
                 else
                 {
-                    itemInfoDisplayTextMesh.text += "A ROPE THAT DROPS DOWN 5m\n";
+                    itemInfoDisplayTextMesh.text += "A ROPE THAT DROPS DOWN 5.0m\n";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(VineShooter))
@@ -327,7 +353,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(BingBong))
             {
-                itemInfoDisplayTextMesh.text += "MASCOT OF BING BONG AIRWAYS\n";
+                itemInfoDisplayTextMesh.text += "MASCOT OF BINGBONG AIRWAYS\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_Passport))
             {
