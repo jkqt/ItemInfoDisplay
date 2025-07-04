@@ -129,6 +129,7 @@ public partial class Plugin : BaseUnityPlugin
         Item item = Character.observedCharacter.data.currentItem;
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
+        bool isConsumable = false;
         string prefixStatus = "";
         string suffixWeight = effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
         string suffixUses = "";
@@ -155,7 +156,19 @@ public partial class Plugin : BaseUnityPlugin
 
         for (int i = 0; i < itemComponents.Length; i++)
         {
-            if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
+            if (itemComponents[i].GetType() == typeof(ItemUseFeedback))
+            {
+                ItemUseFeedback itemUseFeedback = (ItemUseFeedback)itemComponents[i];
+                if (itemUseFeedback.useAnimation.Equals("Eat") || itemUseFeedback.useAnimation.Equals("Drink") || itemUseFeedback.useAnimation.Equals("Heal"))
+                {
+                    isConsumable = true;
+                }
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_Consume))
+            {
+                isConsumable = true;
+            }
+            else if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
             {
                 Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
                 prefixStatus += ProcessEffect((effect.restorationAmount * -1f), "Hunger");
@@ -263,6 +276,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
             {
                 Action_RaycastDart effect = (Action_RaycastDart)itemComponents[i];
+                isConsumable = true;
                 suffixAfflictions += "<#CCCCCC>SHOOT A DART THAT WILL APPLY:</color>\n";
                 for (int j = 0; j < effect.afflictionsOnHit.Length; j++)
                 {
@@ -278,6 +292,10 @@ public partial class Plugin : BaseUnityPlugin
                     suffixAfflictions = suffixAfflictions.Remove(suffixAfflictions.Length - 2);
                 }
                 suffixAfflictions += "\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(MagicBugle))
+            {
+                itemInfoDisplayTextMesh.text += "WHILE PLAYING THE BUGLE,";
             }
             else if (itemComponents[i].GetType() == typeof(ClimbingSpikeComponent))
             {
@@ -370,6 +388,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_SpawnGuidebookPage))
             {
+                isConsumable = true;
                 itemInfoDisplayTextMesh.text += "CAN BE OPENED\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_Guidebook))
@@ -454,7 +473,7 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
 
-        if (prefixStatus.Length > 0)
+        if ((prefixStatus.Length > 0) && isConsumable)
         {
             itemInfoDisplayTextMesh.text = prefixStatus + "\n" + itemInfoDisplayTextMesh.text;
         }
