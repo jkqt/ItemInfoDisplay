@@ -239,20 +239,20 @@ public partial class Plugin : BaseUnityPlugin
                 if (itemGameObj.name.Equals("Lantern_Faerie(Clone)"))
                 {
                     StatusField effect = itemGameObj.transform.Find("FaerieLantern/Light/Heat").GetComponent<StatusField>();
-                    suffixAfflictions = ProcessEffectOverTime(effect.statusAmountPerSecond, 1f, lantern.startingFuel, effect.statusType.ToString());
+                    suffixAfflictions += ProcessEffectOverTime(effect.statusAmountPerSecond, 1f, lantern.startingFuel, effect.statusType.ToString());
                     foreach (StatusField.StatusFieldStatus status in effect.additionalStatuses)
                     {
                         if (suffixAfflictions.EndsWith('\n'))
                         {
                             suffixAfflictions = suffixAfflictions.Remove(suffixAfflictions.Length - 1);
                         }
-                        suffixAfflictions = ",\n" + ProcessEffectOverTime(status.statusAmountPerSecond, 1f, lantern.startingFuel, status.statusType.ToString());
+                        suffixAfflictions += ",\n" + ProcessEffectOverTime(status.statusAmountPerSecond, 1f, lantern.startingFuel, status.statusType.ToString());
                     }
                 }
                 else if (itemGameObj.name.Equals("Lantern(Clone)"))
                 {
                     StatusField effect = itemGameObj.transform.Find("GasLantern/Light/Heat").GetComponent<StatusField>();
-                    suffixAfflictions = ProcessEffectOverTime(effect.statusAmountPerSecond, 1f, lantern.startingFuel, effect.statusType.ToString());
+                    suffixAfflictions += ProcessEffectOverTime(effect.statusAmountPerSecond, 1f, lantern.startingFuel, effect.statusType.ToString());
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
@@ -336,17 +336,15 @@ public partial class Plugin : BaseUnityPlugin
                 ShelfShroom effect = (ShelfShroom)itemComponents[i];
                 if (effect.instantiateOnBreak.name.Equals("HealingPuffShroomSpawn"))
                 {
-                    /*GameObject effect1 = effect.instantiateOnBreak.transform.Find("VFX_SporeHealingExplo").gameObject;
+                    GameObject effect1 = effect.instantiateOnBreak.transform.Find("VFX_SporeHealingExplo").gameObject;
                     AOE effect1AOE = effect1.GetComponent<AOE>();
                     GameObject effect2 = effect1.transform.Find("VFX_SporePoisonExplo").gameObject;
                     AOE effect2AOE = effect2.GetComponent<AOE>();
                     TimeEvent effect2TimeEvent = effect2.GetComponent<TimeEvent>();
-                    RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();*/
-                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO RELEASE GAS THAT WILL\n";
-                    // itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString()); // incorrect? calculates strangely
-                    // itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2TimeEvent.rate, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString()); // incorrect?
-                    itemInfoDisplayTextMesh.text += ProcessEffect(-0.175f, "Injury");
-                    itemInfoDisplayTextMesh.text += ProcessEffectOverTime(-0.025f, 1f, 11f, "Injury");
+                    RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();
+                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO RELEASE GAS THAT WILL:\n";
+                    itemInfoDisplayTextMesh.text += ProcessEffect((Mathf.Round(effect1AOE.statusAmount * 0.9f * 40f) / 40f), effect1AOE.statusType.ToString()); // incorrect? calculates strangely so i somewhat manually adjusted the values
+                    itemInfoDisplayTextMesh.text += ProcessEffectOverTime((Mathf.Round(effect2AOE.statusAmount * (1f / effect2TimeEvent.rate) * 40f) / 40f), 1f, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString()); // incorrect?
                 }
                 else if (effect.instantiateOnBreak.name.Equals("ShelfShroomSpawn"))
                 {
@@ -451,13 +449,13 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
 
-        if (itemInfoDisplayTextMesh.text.Length == 0)
-        {
-            itemInfoDisplayTextMesh.text += "???\n";
-        }
         if (suffixAfflictions.Length > 0)
         {
             itemInfoDisplayTextMesh.text += "\n" + suffixAfflictions;
+        }
+        if (itemInfoDisplayTextMesh.text.Length == 0)
+        {
+            itemInfoDisplayTextMesh.text += "???\n";
         }
         itemInfoDisplayTextMesh.text += "\n" + suffixWeight + suffixUses + suffixCooked;
     }
