@@ -618,7 +618,7 @@ public partial class Plugin : BaseUnityPlugin
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.DrowsyOverTime)
         {
-            Peak.Afflictions.Affliction_AdjustDrowsyOverTime effect = (Peak.Afflictions.Affliction_AdjustDrowsyOverTime)affliction;
+            Peak.Afflictions.Affliction_AdjustDrowsyOverTime effect = (Peak.Afflictions.Affliction_AdjustDrowsyOverTime)affliction; // 1.6.a
             if (effect.statusPerSecond > 0)
             {
                 result += effectColors["ItemInfoDisplayNegative"] + "GAIN</color> ";
@@ -632,7 +632,7 @@ public partial class Plugin : BaseUnityPlugin
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.ColdOverTime)
         {
-            Peak.Afflictions.Affliction_AdjustColdOverTime effect = (Peak.Afflictions.Affliction_AdjustColdOverTime)affliction;
+            Peak.Afflictions.Affliction_AdjustColdOverTime effect = (Peak.Afflictions.Affliction_AdjustColdOverTime)affliction; // 1.6.a
             if (effect.statusPerSecond > 0)
             {
                 result += effectColors["ItemInfoDisplayNegative"] + "GAIN</color> ";
@@ -646,7 +646,7 @@ public partial class Plugin : BaseUnityPlugin
         }
         /*else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatusOverTime)
         {
-            Peak.Afflictions.Affliction_AdjustStatusOverTime effect = (Peak.Afflictions.Affliction_AdjustStatusOverTime)affliction;
+            Peak.Afflictions.Affliction_AdjustStatusOverTime effect = (Peak.Afflictions.Affliction_AdjustStatusOverTime)affliction; // 1.5.a
             if (effect.statusPerSecond > 0)
             {
                 if (effect.Equals("Extra Stamina"))
@@ -680,10 +680,10 @@ public partial class Plugin : BaseUnityPlugin
                 + effectColors["Extra Stamina"] + "EXTRA STAMINA</color>, " + effectColors["Injury"] + "INJURY</color>,\n" + effectColors["Poison"] + "POISON</color>, "
                 + effectColors["Cold"] + "COLD</color>, " + effectColors["Hot"] + "HEAT</color>, " + effectColors["Drowsy"] + "DROWSY</color>\n";
         }
-        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Glowing)
+        /*else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Glowing)
         {
             result += "???\n";
-        }
+        }*/
 
         return result;
     }
