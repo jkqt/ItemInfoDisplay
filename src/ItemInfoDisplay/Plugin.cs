@@ -232,13 +232,28 @@ public partial class Plugin : BaseUnityPlugin
                     suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USE";
                 }
             }
-            else if (itemComponents[i].GetType() == typeof(Action_LightLantern))
+            else if (itemComponents[i].GetType() == typeof(Lantern))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_LightLantern\n";
-            }
-            else if (itemComponents[i].GetType() == typeof(Action_TootMagicBugle))
-            {
-                itemInfoDisplayTextMesh.text += "TODO: Action_TootMagicBugle\n";
+                Lantern lantern = (Lantern)itemComponents[i];
+                suffixAfflictions += "<#CCCCCC>WHEN LIT, NEARBY PLAYERS RECEIVE:</color>\n";
+                if (itemGameObj.name.Equals("Lantern_Faerie(Clone)"))
+                {
+                    StatusField effect = itemGameObj.transform.Find("FaerieLantern/Light/Heat").GetComponent<StatusField>();
+                    suffixAfflictions = ProcessEffectOverTime(effect.statusAmountPerSecond, 1f, lantern.startingFuel, effect.statusType.ToString());
+                    foreach (StatusField.StatusFieldStatus status in effect.additionalStatuses)
+                    {
+                        if (suffixAfflictions.EndsWith('\n'))
+                        {
+                            suffixAfflictions = suffixAfflictions.Remove(suffixAfflictions.Length - 1);
+                        }
+                        suffixAfflictions = ",\n" + ProcessEffectOverTime(status.statusAmountPerSecond, 1f, lantern.startingFuel, status.statusType.ToString());
+                    }
+                }
+                else if (itemGameObj.name.Equals("Lantern(Clone)"))
+                {
+                    StatusField effect = itemGameObj.transform.Find("GasLantern/Light/Heat").GetComponent<StatusField>();
+                    suffixAfflictions = ProcessEffectOverTime(effect.statusAmountPerSecond, 1f, lantern.startingFuel, effect.statusType.ToString());
+                }
             }
             else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
             {
