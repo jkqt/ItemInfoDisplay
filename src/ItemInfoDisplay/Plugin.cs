@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using Steamworks;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -135,15 +136,15 @@ public partial class Plugin : BaseUnityPlugin
 
         if (itemGameObj.name.Equals("Bugle(Clone)"))
         {
-            itemInfoDisplayTextMesh.text += "CAN BE PLAYED\n";
+            itemInfoDisplayTextMesh.text += "MAKE SOME NOISE\n";
         }
         else if (itemGameObj.name.Equals("Pirate Compass(Clone)"))
         {
-            itemInfoDisplayTextMesh.text += "POINTS TO THE NEAREST LUGGAGE\n";
+            itemInfoDisplayTextMesh.text += effectColors["Injury"] + "POINTS</color> TO THE NEAREST LUGGAGE\n";
         }
         else if (itemGameObj.name.Equals("Compass(Clone)"))
         {
-            itemInfoDisplayTextMesh.text += "POINTS NORTH\n";
+            itemInfoDisplayTextMesh.text += effectColors["Injury"] + "POINTS</color> NORTH TO THE PEAK\n";
         }
         else if (itemGameObj.name.Equals("Shell Big(Clone)"))
         {
@@ -178,11 +179,22 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyMassAffliction))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyMassAffliction\n";
+                Action_ApplyMassAffliction effect = (Action_ApplyMassAffliction)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "NEARBY PLAYERS WILL RECEIVE:\n";
+                itemInfoDisplayTextMesh.text += ProcessAffliction(effect.affliction);
+                if (effect.extraAfflictions.Length > 0)
+                {
+                    for (int j = 0; j < effect.extraAfflictions.Length; j++)
+                    {
+                        itemInfoDisplayTextMesh.text += ",\n" + ProcessAffliction(effect.extraAfflictions[j]);
+                    }
+                }
+                itemInfoDisplayTextMesh.text += "\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyAffliction))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_ApplyAffliction\n";
+                Action_ApplyAffliction effect = (Action_ApplyAffliction)itemComponents[i];
+                itemInfoDisplayTextMesh.text += ProcessAffliction(effect.affliction);
             }
             else if (itemComponents[i].GetType() == typeof(Action_ClearAllStatus))
             {
@@ -220,10 +232,10 @@ public partial class Plugin : BaseUnityPlugin
                     suffixUses += "   " + item.data.data[DataEntryKey.ItemUses] + " USE";
                 }
             }
-            else if (itemComponents[i].GetType() == typeof(Action_ApplyInfiniteStamina))
+            /*else if (itemComponents[i].GetType() == typeof(Action_ApplyInfiniteStamina))
             {
                 itemInfoDisplayTextMesh.text += "TODO: Action_ApplyInfiniteStamina\n";
-            }
+            }*/
             else if (itemComponents[i].GetType() == typeof(Action_LightLantern))
             {
                 itemInfoDisplayTextMesh.text += "TODO: Action_LightLantern\n";
@@ -234,7 +246,13 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_RaycastDart))
             {
-                itemInfoDisplayTextMesh.text += "TODO: Action_RaycastDart\n";
+                Action_RaycastDart effect = (Action_RaycastDart)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "SHOOT A DART THAT WILL APPLY:\n";
+                for (int j = 0; j < effect.afflictionsOnHit.Length; j++)
+                {
+                    itemInfoDisplayTextMesh.text += ProcessAffliction(effect.afflictionsOnHit[j]) + ", \n";
+                }
+                itemInfoDisplayTextMesh.text = itemInfoDisplayTextMesh.text.Remove(itemInfoDisplayTextMesh.text.Length - 4) + "\n\n";
             }
             else if (itemComponents[i].GetType() == typeof(ClimbingSpikeComponent))
             {
@@ -305,7 +323,7 @@ public partial class Plugin : BaseUnityPlugin
                     TimeEvent effect2TimeEvent = effect2.GetComponent<TimeEvent>();
                     RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();*/
                     itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A GAS THAT WILL\n";
-                    // itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString()); // incorrect?
+                    // itemInfoDisplayTextMesh.text += ProcessEffect(effect1AOE.statusAmount, effect1AOE.statusType.ToString()); // incorrect? calculates strangely
                     // itemInfoDisplayTextMesh.text += ProcessEffectOverTime(effect2AOE.statusAmount, effect2TimeEvent.rate, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString()); // incorrect?
                     itemInfoDisplayTextMesh.text += ProcessEffect(-0.175f, "Injury");
                     itemInfoDisplayTextMesh.text += ProcessEffectOverTime(-0.025f, 1f, 11f, "Injury");
@@ -346,10 +364,18 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     itemInfoDisplayTextMesh.text += "GAIN " + effectColors["Extra Stamina"] + (effect.baselineStaminaBoost * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
                 }
+                else if (effect.boostRadius > 0)
+                {
+                    itemInfoDisplayTextMesh.text += "NEARBY PLAYERS GAIN " + effectColors["Extra Stamina"] + (effect.baselineStaminaBoost * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
+                }
             }
             else if (itemComponents[i].GetType() == typeof(Breakable))
             {
                 itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO CRACK OPEN\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(MagicBean))
+            {
+                itemInfoDisplayTextMesh.text += "DROP TO GROW A VINE THAT GROWS\nPERPENDICULAR TO TERRAIN UP TO\n10.0m OR UNTIL IT HITS SOMETHING\n";
             }
             else if (itemComponents[i].GetType() == typeof(BingBong))
             {
@@ -446,6 +472,69 @@ public partial class Plugin : BaseUnityPlugin
             result += "REMOVE ";
         }
         result += effectColors[effect] + ((Mathf.Abs(amountPerSecond) * time * (1 / rate)) * 100f).ToString("F1").Replace(".0", "") + " " + effect.ToUpper() + "</color> OVER " + time.ToString() + "s\n";
+
+        return result;
+    }
+
+    private static string ProcessAffliction(Peak.Afflictions.Affliction affliction)
+    {
+        string result = "";
+
+        if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.FasterBoi)
+        {
+            Peak.Afflictions.Affliction_FasterBoi effect = (Peak.Afflictions.Affliction_FasterBoi)affliction;
+            result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
+                + Mathf.Round(effect.moveSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS RUN SPEED</color> OR\n"
+                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s of " + effectColors["ExtraStamina"] 
+                + Mathf.Round(effect.climbSpeedMod * 100f).ToString("F1").Replace(".0", "") + "% BONUS CLIMB SPEED</color>\nAFTERWARDS, GAIN "
+                + effectColors["Drowsy"] + (effect.drowsyOnEnd * 100f).ToString("F1").Replace(".0", "") + " DROWSY</color>\n";
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.ClearAllStatus)
+        {
+            Peak.Afflictions.Affliction_ClearAllStatus effect = (Peak.Afflictions.Affliction_ClearAllStatus)affliction;
+            result += "CLEAR ALL STATUS";
+            if (effect.excludeCurse)
+            {
+                result += " EXCEPT " + effectColors["Curse"] + "CURSE</color>";
+            }
+            result += "\n";
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AddBonusStamina)
+        {
+            Peak.Afflictions.Affliction_AddBonusStamina effect = (Peak.Afflictions.Affliction_AddBonusStamina)affliction;
+            result += "GAIN " + effectColors["ExtraStamina"] + (effect.staminaAmount * 100f).ToString("F1").Replace(".0", "") + " EXTRA STAMINA</color>\n";
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.InfiniteStamina)
+        {
+            Peak.Afflictions.Affliction_InfiniteStamina effect = (Peak.Afflictions.Affliction_InfiniteStamina)affliction;
+            result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF INFINITE RUN STAMINA OR\n"
+                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF INFINITE CLIMB STAMINA\nAFTERWARDS, ";
+            result += ProcessAffliction(effect.drowsyAffliction);
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatusOverTime)
+        {
+            Peak.Afflictions.Affliction_AdjustStatusOverTime effect = (Peak.Afflictions.Affliction_AdjustStatusOverTime)affliction;
+            if (effect.statusPerSecond > 0)
+            {
+                result += "GAIN ";
+            }
+            else
+            {
+                result += "REMOVE ";
+            }
+            result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "") 
+                + " " + effect.statusType.ToString() + "</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Chaos)
+        {
+            result += "CLEAR ALL STATUS, THEN RANDOMIZE\n" + effectColors["Hunger"] + "HUNGER</color>, "
+                + effectColors["ExtraStamina"] + "EXTRA STAMINA</color>, " + effectColors["Injury"] + "INJURY</color>,\n" + effectColors["Poison"] + "POISON</color>, "
+                + effectColors["Cold"] + "COLD</color>, " + effectColors["Hot"] + "HEAT</color>, " + effectColors["Drowsy"] + "DROWSY</color>\n";
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Glowing)
+        {
+            result += "???\n";
+        }
 
         return result;
     }
