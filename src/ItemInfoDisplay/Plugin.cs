@@ -129,6 +129,7 @@ public partial class Plugin : BaseUnityPlugin
         Item item = Character.observedCharacter.data.currentItem;
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
+        string prefixStatus = "";
         string suffixWeight = effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
         string suffixUses = "";
         string suffixCooked = "";
@@ -157,22 +158,22 @@ public partial class Plugin : BaseUnityPlugin
             if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
             {
                 Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
-                itemInfoDisplayTextMesh.text += ProcessEffect((effect.restorationAmount * -1f), "Hunger");
+                prefixStatus += ProcessEffect((effect.restorationAmount * -1f), "Hunger");
             }
             else if (itemComponents[i].GetType() == typeof(Action_GiveExtraStamina))
             {
                 Action_GiveExtraStamina effect = (Action_GiveExtraStamina)itemComponents[i];
-                itemInfoDisplayTextMesh.text += ProcessEffect(effect.amount, "Extra Stamina");
+                prefixStatus += ProcessEffect(effect.amount, "Extra Stamina");
             }
             else if (itemComponents[i].GetType() == typeof(Action_InflictPoison))
             {
                 Action_InflictPoison effect = (Action_InflictPoison)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "AFTER " + effect.delay.ToString() + "s, " + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
+                prefixStatus += "AFTER " + effect.delay.ToString() + "s, " + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
             }
             else if (itemComponents[i].GetType() == typeof(Action_ModifyStatus))
             {
                 Action_ModifyStatus effect = (Action_ModifyStatus)itemComponents[i];
-                itemInfoDisplayTextMesh.text += ProcessEffect(effect.changeAmount, effect.statusType.ToString());
+                prefixStatus += ProcessEffect(effect.changeAmount, effect.statusType.ToString());
             }
             else if (itemComponents[i].GetType() == typeof(Action_ApplyMassAffliction))
             {
@@ -453,6 +454,10 @@ public partial class Plugin : BaseUnityPlugin
             }
         }
 
+        if (prefixStatus.Length > 0)
+        {
+            itemInfoDisplayTextMesh.text = prefixStatus + itemInfoDisplayTextMesh.text + "\n";
+        }
         if (suffixAfflictions.Length > 0)
         {
             itemInfoDisplayTextMesh.text += "\n" + suffixAfflictions;
