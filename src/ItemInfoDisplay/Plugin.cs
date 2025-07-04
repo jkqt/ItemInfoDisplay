@@ -507,9 +507,20 @@ public partial class Plugin : BaseUnityPlugin
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.InfiniteStamina)
         {
             Peak.Afflictions.Affliction_InfiniteStamina effect = (Peak.Afflictions.Affliction_InfiniteStamina)affliction;
-            result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF INFINITE RUN STAMINA OR\n"
-                + "GAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF INFINITE CLIMB STAMINA\nAFTERWARDS, ";
-            result += ProcessAffliction(effect.drowsyAffliction);
+            if (effect.climbDelay > 0)
+            {
+                result += "GAIN " + (effect.totalTime + effect.climbDelay).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
+                    + "INFINITE RUN STAMINA</color> OR\nGAIN " + effect.totalTime.ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] 
+                    + "INFINITE CLIMB STAMINA</color>\n";
+            }
+            else
+            {
+                result += "GAIN " + (effect.totalTime).ToString("F1").Replace(".0", "") + "s OF " + effectColors["Extra Stamina"] + "INFINITE STAMINA\n";
+            }
+            if (effect.drowsyAffliction != null)
+            {
+                result += "AFTERWARDS, " + ProcessAffliction(effect.drowsyAffliction);
+            }
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatusOverTime)
         {
