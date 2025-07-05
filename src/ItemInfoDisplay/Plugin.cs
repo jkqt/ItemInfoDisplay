@@ -155,11 +155,20 @@ public partial class Plugin : BaseUnityPlugin
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
         bool isConsumable = false;
         string prefixStatus = "";
-        string suffixWeight = effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
+        string suffixWeight = "";
         string suffixUses = "";
         string suffixCooked = "";
         string suffixAfflictions = "";
         itemInfoDisplayTextMesh.text = "";
+
+        if (Ascents.itemWeightModifier > 0)
+        {
+            suffixWeight += effectColors["Weight"] + ((item.carryWeight + Ascents.itemWeightModifier) * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
+        }
+        else
+        {
+            suffixWeight += effectColors["Weight"] + (item.carryWeight * 2.5f).ToString("F1").Replace(".0", "") + " WEIGHT</color>";
+        }
 
         if (itemGameObj.name.Equals("Bugle(Clone)"))
         {
