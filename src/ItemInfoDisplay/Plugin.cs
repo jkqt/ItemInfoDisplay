@@ -393,7 +393,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Antigrav))
             {
-                suffixAfflictions += "THIS ITEM FLOATS UP WHEN DROPPED\n";
+                suffixAfflictions += effectColors["Injury"] + "WARNING:</color> <#CCCCCC>FLIES AWAY IF DROPPED</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(VineShooter))
             {

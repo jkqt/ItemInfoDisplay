@@ -1,7 +1,7 @@
 # ItemInfoDisplay
 
-Displays item information to the left of item prompts (which is most likely bottom right of your screen).
-It just inefficiently scans all the components of an item to pull information from.
+Displays item information to the left of item prompts (at the bottom right of your screen).
+It works by inefficiently scanning all components of the equipped item to pull information from.
 
 Displays:
 - Status Changes (e.g. Hunger, Poison)
