@@ -369,7 +369,8 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     itemInfoDisplayTextMesh.text += "PLACE A ROPE\n";
                 }
-                itemInfoDisplayTextMesh.text += "UP TO " + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m\n";
+                itemInfoDisplayTextMesh.text += "FROM " + (effect.minSegments / 4f).ToString("F2").Replace(".0", "") + "m, UP TO " 
+                    + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m\n";
                 suffixUses += "   " + (effect.RopeFuel / 4f).ToString("F1").Replace(".0", "") + "m LEFT";
             }
             else if (itemComponents[i].GetType() == typeof(RopeShooter))
