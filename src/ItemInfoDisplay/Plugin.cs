@@ -373,19 +373,22 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(RopeShooter))
             {
                 RopeShooter effect = (RopeShooter)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "SHOOT A ROPE ANCHOR WHICH PLACES\n";
+                itemInfoDisplayTextMesh.text += "SHOOT A ROPE ANCHOR WHICH PLACES\nA ROPE THAT FLOATS ";
                 if (effect.ropeAnchorWithRopePref.name.Equals("RopeAnchorForRopeShooterAnti"))
                 {
-                    itemInfoDisplayTextMesh.text += "A ROPE THAT FLOATS UP 5.0m\n";
+                    itemInfoDisplayTextMesh.text += "UP ";
                 }
                 else
                 {
-                    itemInfoDisplayTextMesh.text += "A ROPE THAT DROPS DOWN 5.0m\n";
+                    itemInfoDisplayTextMesh.text += "DOWN ";
                 }
+                itemInfoDisplayTextMesh.text += (effect.maxLength / 4f).ToString("F1").Replace(".0", "") + "m\n";
             }
             else if (itemComponents[i].GetType() == typeof(VineShooter))
             {
-                itemInfoDisplayTextMesh.text += "SHOOT A CHAIN THAT CONNECTS FROM\nYOUR POSITION TO WHERE YOU SHOOT\n";
+                VineShooter effect = (VineShooter)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "SHOOT A CHAIN THAT CONNECTS FROM\nYOUR POSITION TO WHERE YOU SHOOT\nUP TO " 
+                    + (effect.maxLength / (5f / 3f)).ToString("F1").Replace(".0", "") + "m AWAY";
             }
             else if (itemComponents[i].GetType() == typeof(ShelfShroom))
             {
