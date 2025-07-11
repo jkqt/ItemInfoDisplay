@@ -369,8 +369,8 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     itemInfoDisplayTextMesh.text += "PLACE A ROPE\n";
                 }
-                itemInfoDisplayTextMesh.text += "FROM " + (effect.minSegments / 4f).ToString("F2").Replace(".0", "") + "m, UP TO " 
-                    + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m\n";
+                itemInfoDisplayTextMesh.text += "FROM " + (effect.minSegments / 4f).ToString("F2").Replace(".0", "") + "m LONG, UP TO " 
+                    + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m LONG\n";
                 //using force update here for remaining length since Rope has no character distinction for Detach_Rpc() hook, maybe unless OK with any player triggering this
                 if (configForceUpdateTime.Value <= 1f)
                 {
