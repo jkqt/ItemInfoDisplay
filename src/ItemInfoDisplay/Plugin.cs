@@ -684,7 +684,7 @@ public partial class Plugin : BaseUnityPlugin
             {
                 result += effectColors["ItemInfoDisplayPositive"] + "REMOVE</color> ";
             }
-            result += effectColors["Drowsy"] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "")
+            result += effectColors["Drowsy"] + (Mathf.Round((Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f) * 0.4f) / 0.4f).ToString("F1").Replace(".0", "")
                 + " DROWSY</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
         }
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.ColdOverTime)
