@@ -477,6 +477,14 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += "WARP TO RANDOM PLAYER\n";
             }
+            else if (itemComponents[i].GetType() == typeof(Parasol))
+            {
+                itemInfoDisplayTextMesh.text += "OPEN TO SLOW YOUR DESCENT\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Frisbee))
+            {
+                itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> IT\n";
+            }
             else if (itemComponents[i].GetType() == typeof(ItemCooking))
             {
                 ItemCooking itemCooking = (ItemCooking)itemComponents[i];
