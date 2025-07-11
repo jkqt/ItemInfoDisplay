@@ -455,6 +455,10 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO CRACK OPEN\n";
             }
+            else if (itemComponents[i].GetType() == typeof(Bonkable))
+            {
+                itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> AT HEAD TO " + effectColors["Injury"] + "BONK</color>\n";
+            }
             else if (itemComponents[i].GetType() == typeof(MagicBean))
             {
                 MagicBean effect = (MagicBean)itemComponents[i];
