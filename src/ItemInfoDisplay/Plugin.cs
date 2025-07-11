@@ -371,7 +371,8 @@ public partial class Plugin : BaseUnityPlugin
                 }
                 itemInfoDisplayTextMesh.text += "FROM " + (effect.minSegments / 4f).ToString("F2").Replace(".0", "") + "m, UP TO " 
                     + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m\n";
-                suffixUses += "   " + (effect.RopeFuel / 4f).ToString("F1").Replace(".0", "") + "m LEFT";
+                //suffixUses += "   " + (effect.RopeFuel / 4f).ToString("F1").Replace(".0", "") + "m LEFT";
+                // removed remaining length since Rope has no character distinction for Detach_Rpc() hook
             }
             else if (itemComponents[i].GetType() == typeof(RopeShooter))
             {
