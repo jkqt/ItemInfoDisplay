@@ -371,8 +371,11 @@ public partial class Plugin : BaseUnityPlugin
                 }
                 itemInfoDisplayTextMesh.text += "FROM " + (effect.minSegments / 4f).ToString("F2").Replace(".0", "") + "m, UP TO " 
                     + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m\n";
-                //suffixUses += "   " + (effect.RopeFuel / 4f).ToString("F1").Replace(".0", "") + "m LEFT";
-                // removed remaining length since Rope has no character distinction for Detach_Rpc() hook
+                //using force update here for remaining length since Rope has no character distinction for Detach_Rpc() hook, maybe unless OK with any player triggering this
+                if (configForceUpdateTime.Value <= 1f)
+                {
+                    suffixUses += "   " + (effect.RopeFuel / 4f).ToString("F2").Replace(".00", "") + "m LEFT";
+                }
             }
             else if (itemComponents[i].GetType() == typeof(RopeShooter))
             {
@@ -387,6 +390,10 @@ public partial class Plugin : BaseUnityPlugin
                     itemInfoDisplayTextMesh.text += "DROPS DOWN ";
                 }
                 itemInfoDisplayTextMesh.text += (effect.maxLength / 4f).ToString("F1").Replace(".0", "") + "m\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Antigrav))
+            {
+                suffixAfflictions += "THIS ITEM FLOATS UP WHEN DROPPED\n";
             }
             else if (itemComponents[i].GetType() == typeof(VineShooter))
             {
