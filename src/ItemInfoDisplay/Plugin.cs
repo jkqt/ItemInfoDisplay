@@ -277,10 +277,10 @@ public partial class Plugin : BaseUnityPlugin
                     {
                         suffixUses += "   " + uses.Value + " USES";
                     }
-                    else if (uses.Value == 1)
+                    /*else if (uses.Value == 1)
                     {
                         suffixUses += "   " + uses.Value + " USE";
-                    }
+                    }*/
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Lantern))
