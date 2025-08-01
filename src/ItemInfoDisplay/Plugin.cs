@@ -395,7 +395,11 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Antigrav))
             {
-                suffixAfflictions += effectColors["Injury"] + "WARNING:</color> <#CCCCCC>FLIES AWAY IF DROPPED</color>\n";
+                Antigrav effect = (Antigrav)itemComponents[i];
+                if (effect.intensity != 0f)
+                {
+                    suffixAfflictions += effectColors["Injury"] + "WARNING:</color> <#CCCCCC>FLIES AWAY IF DROPPED</color>\n";
+                }
             }
             else if (itemComponents[i].GetType() == typeof(VineShooter))
             {
@@ -421,7 +425,7 @@ public partial class Plugin : BaseUnityPlugin
                     if(effect2AOEs.Length > 1)
                     {
                         itemInfoDisplayTextMesh.text += ProcessEffectOverTime((Mathf.Round(effect2AOEs[1].statusAmount * (1f / effect2TimeEvent.rate) * 40f) / 40f), 1f, (effect2RemoveAfterSeconds.seconds + 1f), effect2AOEs[1].statusType.ToString()); // incorrect?
-                    }
+                    } // didn't handle dynamically because there were 2 poison removal AOEs but 1 doesn't seem to work or they are buggy in some way (probably time event rate)?
                 }
                 else if (effect.instantiateOnBreak.name.Equals("ShelfShroomSpawn"))
                 {

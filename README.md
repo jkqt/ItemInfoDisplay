@@ -1,7 +1,5 @@
 # ItemInfoDisplay
 
-This mod is only found at https://thunderstore.io/c/peak/p/jkqt/ItemInfoDisplay/ - Do NOT download it from anywhere else!
-
 Displays item information to the left of item prompts (at the bottom right of your screen).
 It works by inefficiently scanning all components of the equipped item to pull information from.
 
@@ -19,5 +17,6 @@ It has limited quantification of equipment effects such as ropes (and remedy fun
 Configurable:
 - Font Size
 - Text Outline Width
+- Line Spacing
 - Size Delta X (suboptimal workaround to move the text horizontally)
 - Force Update Time
