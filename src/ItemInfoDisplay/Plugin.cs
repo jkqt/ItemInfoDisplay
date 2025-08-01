@@ -20,6 +20,7 @@ public partial class Plugin : BaseUnityPlugin
     private static bool hasChanged;
     private static ConfigEntry<float> configFontSize;
     private static ConfigEntry<float> configOutlineWidth;
+    private static ConfigEntry<float> configLineSpacing;
     private static ConfigEntry<float> configSizeDeltaX;
     private static ConfigEntry<float> configForceUpdateTime;
 
@@ -31,6 +32,7 @@ public partial class Plugin : BaseUnityPlugin
         hasChanged = true;
         configFontSize = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Font Size", 20f, "Customize the Font Size for description text.");
         configOutlineWidth = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Outline Width", 0.08f, "Customize the Outline Width for item description text.");
+        configLineSpacing = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Line Spacing", -35f, "Customize the Line Spacing for item description text.");
         configSizeDeltaX = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Size Delta X", 550f, "Customize the horizontal length of the container for the mod. Increasing moves text left, decreasing moves text right.");
         configForceUpdateTime = ((BaseUnityPlugin)this).Config.Bind<float>("ItemInfoDisplay", "Force Update Time", 1f, "Customize the time in seconds until the mod forces an update for the item.");
         Harmony.CreateAndPatchAll(typeof(ItemInfoDisplayUpdatePatch));
@@ -410,11 +412,16 @@ public partial class Plugin : BaseUnityPlugin
                     AOE effect1AOE = effect1.GetComponent<AOE>();
                     GameObject effect2 = effect1.transform.Find("VFX_SporePoisonExplo").gameObject;
                     AOE effect2AOE = effect2.GetComponent<AOE>();
+                    AOE[] effect2AOEs = effect2.GetComponents<AOE>();
                     TimeEvent effect2TimeEvent = effect2.GetComponent<TimeEvent>();
                     RemoveAfterSeconds effect2RemoveAfterSeconds = effect2.GetComponent<RemoveAfterSeconds>();
                     itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO RELEASE GAS THAT WILL:\n";
                     itemInfoDisplayTextMesh.text += ProcessEffect((Mathf.Round(effect1AOE.statusAmount * 0.9f * 40f) / 40f), effect1AOE.statusType.ToString()); // incorrect? calculates strangely so i somewhat manually adjusted the values
                     itemInfoDisplayTextMesh.text += ProcessEffectOverTime((Mathf.Round(effect2AOE.statusAmount * (1f / effect2TimeEvent.rate) * 40f) / 40f), 1f, effect2RemoveAfterSeconds.seconds, effect2AOE.statusType.ToString()); // incorrect?
+                    if(effect2AOEs.Length > 1)
+                    {
+                        itemInfoDisplayTextMesh.text += ProcessEffectOverTime((Mathf.Round(effect2AOEs[1].statusAmount * (1f / effect2TimeEvent.rate) * 40f) / 40f), 1f, (effect2RemoveAfterSeconds.seconds + 1f), effect2AOEs[1].statusType.ToString()); // incorrect?
+                    }
                 }
                 else if (effect.instantiateOnBreak.name.Equals("ShelfShroomSpawn"))
                 {
@@ -784,7 +791,7 @@ public partial class Plugin : BaseUnityPlugin
         itemInfoDisplayTextMesh.font = font;
         itemInfoDisplayTextMesh.fontSize = configFontSize.Value;
         itemInfoDisplayTextMesh.alignment = TextAlignmentOptions.BottomLeft;
-        itemInfoDisplayTextMesh.lineSpacing = -50f;
+        itemInfoDisplayTextMesh.lineSpacing = configLineSpacing.Value;
         itemInfoDisplayTextMesh.text = "";
         itemInfoDisplayTextMesh.outlineWidth = configOutlineWidth.Value;
     }
