@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.4 (for PEAK v.1.20.a)
+- Rebuilt for THE MESA update.
+
 ## 1.0.3 (for PEAK v.1.10.b)
 - Added poison removal for Remedy Fungus.
 - Added line spacing config variable.

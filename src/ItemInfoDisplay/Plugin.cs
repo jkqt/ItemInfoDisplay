@@ -152,7 +152,7 @@ public partial class Plugin : BaseUnityPlugin
 
     private static void ProcessItemGameObject()
     {
-        Item item = Character.observedCharacter.data.currentItem;
+        Item item = Character.observedCharacter.data.currentItem; // not sure why this broke after THE MESA update, made no changes (just rebuilt)
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
         bool isConsumable = false;
