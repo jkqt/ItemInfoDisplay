@@ -511,6 +511,17 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> IT\n";
             }
+            else if (itemComponents[i].GetType() == typeof(Action_Spawn))
+            {
+                Action_Spawn effect = (Action_Spawn)itemComponents[i];
+                if (effect.objectToSpawn.name.Equals("VFX_Sunscreen"))
+                {
+                    AOE effectAOE = effect.objectToSpawn.transform.Find("AOE").GetComponent<AOE>();
+                    RemoveAfterSeconds effectTime = effect.objectToSpawn.transform.Find("AOE").GetComponent<RemoveAfterSeconds>();
+                    itemInfoDisplayTextMesh.text += "<#CCCCCC>SPRAY A " + effectTime.seconds.ToString("F1").Replace(".0", "") + "s MIST THAT APPLIES:</color>\nPREVENT " 
+                        + effectColors["Heat"] + "HEAT</color> IN MESA'S SUN FOR " + effectAOE.affliction.totalTime.ToString("F1").Replace(".0", "") + "s\n";
+                }
+            }
             else if (itemComponents[i].GetType() == typeof(ItemCooking))
             {
                 ItemCooking itemCooking = (ItemCooking)itemComponents[i];
