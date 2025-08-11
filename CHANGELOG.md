@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.5 (for PEAK v.1.20.a)
+- Added description for Sunscreen.
+- Added description for Dynamite.
+- Added description for Scorpion.
+
 ## 1.0.4 (for PEAK v.1.20.a)
 - Rebuilt for THE MESA update.
 

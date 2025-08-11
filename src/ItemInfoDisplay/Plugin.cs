@@ -526,7 +526,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_ConstructableScoutCannonScroll))
             {
-                itemInfoDisplayTextMesh.text += "<#CCCCCC>CAN ENTER BARREL TO LAUNCH YOURSELF</color>\n";
+                itemInfoDisplayTextMesh.text += "<#CCCCCC>CAN LAUNCH A SCOUT</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Dynamite))
             {
@@ -537,7 +537,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Scorpion))
             {
                 Scorpion effect = (Scorpion)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "CAN " + effectColors["Poison"] + "STING</color> YOU WHILE HELD\nDEALS "
+                itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\nDEALS "
                     + effectColors["Poison"] + (effect.poisonPerSecond * 100f * effect.totalPoisonTime).ToString("F1").Replace(".0", "") 
                     + " POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n";
             }
