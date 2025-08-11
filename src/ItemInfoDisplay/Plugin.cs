@@ -511,6 +511,11 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += "WARP TO RANDOM PLAYER\n";
             }
+            else if (itemComponents[i].GetType() == typeof(Action_WarpToBiome))
+            {
+                Action_WarpToBiome effect = (Action_WarpToBiome)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "WARP TO " + effect.segmentToWarpTo.ToString().ToUpper() + "\n";
+            }
             else if (itemComponents[i].GetType() == typeof(Parasol))
             {
                 itemInfoDisplayTextMesh.text += "OPEN TO SLOW YOUR DESCENT\n";
@@ -518,6 +523,19 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Frisbee))
             {
                 itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> IT\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(Dynamite))
+            {
+                Dynamite effect = (Dynamite)itemComponents[i];
+                itemInfoDisplayTextMesh.text += effectColors["Injury"] + "EXPLODES</color> FOR UP TO " + effectColors["Injury"] 
+                    + (effect.explosionPrefab.GetComponent<AOE>().statusAmount * 100f).ToString("F1").Replace(".0", "") + "INJURY</color>\n<#CCCCCC>ADDITIONAL DAMAGE TAKEN IF HELD</color>";
+            }
+            else if (itemComponents[i].GetType() == typeof(Scorpion))
+            {
+                Scorpion effect = (Scorpion)itemComponents[i];
+                itemInfoDisplayTextMesh.text += "CAN " + effectColors["Poison"] + "STING</color> YOU WHILE HELD FOR\n"
+                    + effectColors["Poison"] + (effect.poisonPerSecond * 100f * effect.totalPoisonTime).ToString("F1").Replace(".0", "") 
+                    + "</color> over " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_Spawn))
             {
