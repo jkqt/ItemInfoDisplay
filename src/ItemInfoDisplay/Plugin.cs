@@ -4,8 +4,10 @@ using BepInEx.Logging;
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using TMPro;
 using UnityEngine;
+using Zorro.UI.Effects;
 
 namespace ItemInfoDisplay;
 
@@ -288,7 +290,13 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Lantern))
             {
                 Lantern lantern = (Lantern)itemComponents[i];
-                suffixAfflictions += "<#CCCCCC>WHEN LIT, NEARBY PLAYERS RECEIVE:</color>\n";
+                if (itemGameObj.name.Equals("Torch(Clone)")){
+                    itemInfoDisplayTextMesh.text += "CAN BE LIT\n";
+                }
+                else {
+                    suffixAfflictions += "<#CCCCCC>WHEN LIT, NEARBY PLAYERS RECEIVE:</color>\n";
+                }
+
                 if (itemGameObj.name.Equals("Lantern_Faerie(Clone)"))
                 {
                     StatusField effect = itemGameObj.transform.Find("FaerieLantern/Light/Heat").GetComponent<StatusField>();
@@ -518,9 +526,16 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     AOE effectAOE = effect.objectToSpawn.transform.Find("AOE").GetComponent<AOE>();
                     RemoveAfterSeconds effectTime = effect.objectToSpawn.transform.Find("AOE").GetComponent<RemoveAfterSeconds>();
-                    itemInfoDisplayTextMesh.text += "<#CCCCCC>SPRAY A " + effectTime.seconds.ToString("F1").Replace(".0", "") + "s MIST THAT APPLIES:</color>\nPREVENT " 
-                        + effectColors["Heat"] + "HEAT</color> IN MESA'S SUN FOR " + effectAOE.affliction.totalTime.ToString("F1").Replace(".0", "") + "s\n";
-                }
+                    itemInfoDisplayTextMesh.text += "<#CCCCCC>SPRAY A " + effectTime.seconds.ToString("F1").Replace(".0", "") + "s MIST THAT APPLIES:</color>\n"
+                        + ProcessAffliction(effectAOE.affliction);                }
+            }
+            else if (itemComponents[i].GetType() == typeof(CactusBall))
+            {
+                itemInfoDisplayTextMesh.text += effectColors["Thorns"] + "STICKS</color> TO YOUR HANDS\nCAN BE " + effectColors["Hunger"] + "THROWN</color>\n";
+            }
+            else if (itemComponents[i].GetType() == typeof(BingBongShieldWhileHolding))
+            {
+                itemInfoDisplayTextMesh.text += "SHIELDED WHILE HELD\n";
             }
             else if (itemComponents[i].GetType() == typeof(ItemCooking))
             {
@@ -785,6 +800,11 @@ public partial class Plugin : BaseUnityPlugin
             result += effectColors["ItemInfoDisplayPositive"] + "CLEAR ALL STATUS</color>, THEN RANDOMIZE\n" + effectColors["Hunger"] + "HUNGER</color>, "
                 + effectColors["Extra Stamina"] + "EXTRA STAMINA</color>, " + effectColors["Injury"] + "INJURY</color>,\n" + effectColors["Poison"] + "POISON</color>, "
                 + effectColors["Cold"] + "COLD</color>, " + effectColors["Hot"] + "HEAT</color>, " + effectColors["Drowsy"] + "DROWSY</color>\n";
+        }
+        else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Sunscreen)
+        {
+            Peak.Afflictions.Affliction_Sunscreen effect = (Peak.Afflictions.Affliction_Sunscreen)affliction;
+            result += "PREVENT " + effectColors["Heat"] + "HEAT</color> IN MESA'S SUN FOR " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
         }
         /*else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Glowing)
         {
