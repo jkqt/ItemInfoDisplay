@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.6 (for PEAK v.1.20.a)
+- Added thorns to description for Prickleberry.
+
 ## 1.0.5 (for PEAK v.1.20.a)
 - Added description for Sunscreen.
 - Added description for Dynamite.

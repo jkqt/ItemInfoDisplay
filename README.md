@@ -1,7 +1,5 @@
 # ItemInfoDisplay
 
-This mod is only found at https://thunderstore.io/c/peak/p/jkqt/ItemInfoDisplay/ - Do NOT download it from anywhere else!
-
 Displays item information to the left of item prompts (at the bottom right of your screen).
 It works by inefficiently scanning all components of the equipped item to pull information from.
 

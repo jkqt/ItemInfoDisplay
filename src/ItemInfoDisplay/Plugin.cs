@@ -220,6 +220,11 @@ public partial class Plugin : BaseUnityPlugin
                 Action_InflictPoison effect = (Action_InflictPoison)itemComponents[i];
                 prefixStatus += "AFTER " + effect.delay.ToString() + "s, " + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
             }
+            else if (itemComponents[i].GetType() == typeof(Action_AddOrRemoveThorns))
+            {
+                Action_AddOrRemoveThorns effect = (Action_AddOrRemoveThorns)itemComponents[i];
+                prefixStatus += ProcessEffect((effect.thornCount * 0.05f), "Thorns"); // not sure where or how thorns is calculated yet
+            }
             else if (itemComponents[i].GetType() == typeof(Action_ModifyStatus))
             {
                 Action_ModifyStatus effect = (Action_ModifyStatus)itemComponents[i];
