@@ -817,6 +817,7 @@ public partial class Plugin : BaseUnityPlugin
         dict.Add("Drowsy", "<#FF5CA4>");
         dict.Add("Curse", "<#1B0043>");
         dict.Add("Weight", "<#A65A1C>");
+        dict.Add("Thorns", "<#768E00>");
 
         dict.Add("ItemInfoDisplayPositive", "<#DDFFDD>");
         dict.Add("ItemInfoDisplayNegative", "<#FFCCCC>");
