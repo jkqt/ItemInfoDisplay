@@ -524,18 +524,22 @@ public partial class Plugin : BaseUnityPlugin
             {
                 itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> IT\n";
             }
+            else if (itemComponents[i].GetType() == typeof(Action_ConstructableScoutCannonScroll))
+            {
+                itemInfoDisplayTextMesh.text += "<#CCCCCC>CAN ENTER BARREL TO LAUNCH YOURSELF</color>\n";
+            }
             else if (itemComponents[i].GetType() == typeof(Dynamite))
             {
                 Dynamite effect = (Dynamite)itemComponents[i];
                 itemInfoDisplayTextMesh.text += effectColors["Injury"] + "EXPLODES</color> FOR UP TO " + effectColors["Injury"] 
-                    + (effect.explosionPrefab.GetComponent<AOE>().statusAmount * 100f).ToString("F1").Replace(".0", "") + "INJURY</color>\n<#CCCCCC>ADDITIONAL DAMAGE TAKEN IF HELD</color>";
+                    + (effect.explosionPrefab.GetComponent<AOE>().statusAmount * 100f).ToString("F1").Replace(".0", "") + " INJURY</color>\n<#CCCCCC>ADDITIONAL DAMAGE TAKEN IF HELD</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Scorpion))
             {
                 Scorpion effect = (Scorpion)itemComponents[i];
-                itemInfoDisplayTextMesh.text += "CAN " + effectColors["Poison"] + "STING</color> YOU WHILE HELD FOR\n"
+                itemInfoDisplayTextMesh.text += "CAN " + effectColors["Poison"] + "STING</color> YOU WHILE HELD\nDEALS "
                     + effectColors["Poison"] + (effect.poisonPerSecond * 100f * effect.totalPoisonTime).ToString("F1").Replace(".0", "") 
-                    + "</color> over " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n";
+                    + " POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_Spawn))
             {
