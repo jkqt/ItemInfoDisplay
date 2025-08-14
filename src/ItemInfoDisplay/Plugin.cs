@@ -158,6 +158,7 @@ public partial class Plugin : BaseUnityPlugin
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
         bool isConsumable = false;
+        //bool isMobItem = false;
         string prefixStatus = "";
         string suffixWeight = "";
         string suffixUses = "";
@@ -205,6 +206,10 @@ public partial class Plugin : BaseUnityPlugin
             {
                 isConsumable = true;
             }
+            /*else if (itemComponents[i].GetType() == typeof(MobItem))
+            {
+                isMobItem = true;
+            }*/
             else if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
             {
                 Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
@@ -531,7 +536,8 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_ConstructableScoutCannonScroll))
             {
-                itemInfoDisplayTextMesh.text += "<#CCCCCC>CAN LAUNCH A SCOUT</color>\n";
+                itemInfoDisplayTextMesh.text += "\n<#CCCCCC>WHEN PLACED, CAN LIGHT FUSE TO:</color>\nLAUNCH SCOUTS OR ITEMS IN BARREL\n";
+                    //+ "\n<#CCCCCC>LIMITS GRAVITATIONAL ACCELERATION\n(PREVENTS OR LOWERS FALL DAMAGE)</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Dynamite))
             {
@@ -542,7 +548,24 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Scorpion))
             {
                 Scorpion effect = (Scorpion)itemComponents[i];
-                itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\n<#CCCCCC>DIES IF COOKED</color>\n"; // v.1.23.a not sure where poison amount is handled anymore
+                if (!(effect.mobState is Mob.MobState.Dead))
+                {
+                    if (configForceUpdateTime.Value <= 1f)
+                    {
+                        float effectPoison = Mathf.Max(0.5f, (1f - item.holderCharacter.refs.afflictions.statusSum + 0.05f)) * 100f; // v.1.23.a BASED ON Scorpion.InflictAttack
+                        itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\n\n<#CCCCCC>NEXT STING WILL DEAL:</color>\n"
+                            + effectColors["Poison"] + effectPoison.ToString("F1").Replace(".0", "") + " POISON</color> OVER " 
+                            + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>(MORE DAMAGE IF HEALTHY)</color>\n";
+                    }
+                    else
+                    {
+                        itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> <#CCCCCC>YOU WHILE HELD FOR:</color>\nAT LEAST "
+                            + effectColors["Poison"] + "50 POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\nAT MOST "
+                            + effectColors["Poison"] + "105 POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "")
+                            + "s\n<#CCCCCC>(MORE DAMAGE IF HEALTHY)</color>\n"; // v.1.23.a THERE'S NO VARIABLE FOR POISON AMOUNT, CALCULATED IN Scorpion.InflictAttack
+                    }
+                    itemInfoDisplayTextMesh.text += "\n" + effectColors["Curse"] + "KILLED</color> WHEN " + effectColors["Heat"] + "COOKED</color>\n";
+                }
                 /* itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\nDEALS "
                     + effectColors["Poison"] + (effect.poisonPerSecond * 100f * effect.totalPoisonTime).ToString("F1").Replace(".0", "") 
                     + " POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n"; */ // v.1.20.a
@@ -559,11 +582,13 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(CactusBall))
             {
-                itemInfoDisplayTextMesh.text += effectColors["Thorns"] + "STICKS</color> TO YOUR HANDS\nCAN BE " + effectColors["Hunger"] + "THROWN</color>\n";
+                CactusBall effect = (CactusBall)itemComponents[i];
+                itemInfoDisplayTextMesh.text += effectColors["Thorns"] + "STICKS</color> TO YOUR BODY\nCAN BE " + effectColors["Hunger"] 
+                    + "THROWN</color> WITH " + (effect.throwChargeRequirement * 100f).ToString("F1").Replace(".0", "") + "% FORCE\n";
             }
             else if (itemComponents[i].GetType() == typeof(BingBongShieldWhileHolding))
             {
-                itemInfoDisplayTextMesh.text += "SHIELDED WHILE HELD\n";
+                itemInfoDisplayTextMesh.text += "<#CCCCCC>WHILE EQUIPPED, GRANTS:</color>\n" + effectColors["Shield"] + "SHIELD</color> (INVINCIBILITY)\n";
             }
             else if (itemComponents[i].GetType() == typeof(ItemCooking))
             {
@@ -576,6 +601,10 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     suffixCooked += "\n" + effectColors["Curse"] + "BREAKS IF COOKED</color>";
                 }
+                /*else if (isMobItem)
+                {
+                    suffixCooked += "\n" + effectColors["Curse"] + "KILLED</color> " + effectColors["Extra Stamina"] + "IF COOKED</color>";
+                }*/
                 else if (itemCooking.timesCookedLocal >= ItemCooking.COOKING_MAX)
                 {
                     suffixCooked += "   " + effectColors["Curse"] + itemCooking.timesCookedLocal.ToString() + "x COOKED\nCANNOT BE COOKED</color>";
@@ -877,6 +906,7 @@ public partial class Plugin : BaseUnityPlugin
         dict.Add("Curse", "<#1B0043>");
         dict.Add("Weight", "<#A65A1C>");
         dict.Add("Thorns", "<#768E00>");
+        dict.Add("Shield", "<#D48E00>");
 
         dict.Add("ItemInfoDisplayPositive", "<#DDFFDD>");
         dict.Add("ItemInfoDisplayNegative", "<#FFCCCC>");

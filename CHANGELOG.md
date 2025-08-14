@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.8 (for PEAK v.1.23.b)
+- Added estimated poison info for Scorpion's sting.
+- Minor change to descriptions for Cactus Ball, Scout Cannon, & Ancient Idol.
+
 ## 1.0.7 (for PEAK v.1.23.a)
 - Fixed mod breaking from removal of scorpion's poison var.
 
