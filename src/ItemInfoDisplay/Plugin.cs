@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Design;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Zorro.UI.Effects;
 
 namespace ItemInfoDisplay;
@@ -158,7 +159,6 @@ public partial class Plugin : BaseUnityPlugin
         GameObject itemGameObj = item.gameObject;
         Component[] itemComponents = itemGameObj.GetComponents(typeof(Component));
         bool isConsumable = false;
-        //bool isMobItem = false;
         string prefixStatus = "";
         string suffixWeight = "";
         string suffixUses = "";
@@ -206,10 +206,6 @@ public partial class Plugin : BaseUnityPlugin
             {
                 isConsumable = true;
             }
-            /*else if (itemComponents[i].GetType() == typeof(MobItem))
-            {
-                isMobItem = true;
-            }*/
             else if (itemComponents[i].GetType() == typeof(Action_RestoreHunger))
             {
                 Action_RestoreHunger effect = (Action_RestoreHunger)itemComponents[i];
@@ -228,7 +224,7 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_AddOrRemoveThorns))
             {
                 Action_AddOrRemoveThorns effect = (Action_AddOrRemoveThorns)itemComponents[i];
-                prefixStatus += ProcessEffect((effect.thornCount * 0.05f), "Thorns"); // not sure where or how thorns is calculated yet
+                prefixStatus += ProcessEffect((effect.thornCount * 0.05f), "Thorns"); // TODO: Search for thorns amount per applied thorn
             }
             else if (itemComponents[i].GetType() == typeof(Action_ModifyStatus))
             {
@@ -291,10 +287,6 @@ public partial class Plugin : BaseUnityPlugin
                     {
                         suffixUses += "   " + uses.Value + " USES";
                     }
-                    /*else if (uses.Value == 1)
-                    {
-                        suffixUses += "   " + uses.Value + " USE";
-                    }*/
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Lantern))
@@ -536,7 +528,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_ConstructableScoutCannonScroll))
             {
-                itemInfoDisplayTextMesh.text += "\n<#CCCCCC>WHEN PLACED, CAN LIGHT FUSE TO:</color>\nLAUNCH SCOUTS OR ITEMS IN BARREL\n";
+                itemInfoDisplayTextMesh.text += "\n<#CCCCCC>WHEN PLACED, LIGHT FUSE TO:</color>\nLAUNCH SCOUTS IN BARREL\n";
                     //+ "\n<#CCCCCC>LIMITS GRAVITATIONAL ACCELERATION\n(PREVENTS OR LOWERS FALL DAMAGE)</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Dynamite))
@@ -547,28 +539,22 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Scorpion))
             {
-                Scorpion effect = (Scorpion)itemComponents[i];
-                if (!(effect.mobState is Mob.MobState.Dead))
+                Scorpion effect = (Scorpion)itemComponents[i]; // wanted to hide poison info if dead, but mob state does not immediately update on equip leading to visual bug
+                if (configForceUpdateTime.Value <= 1f)
                 {
-                    if (configForceUpdateTime.Value <= 1f)
-                    {
-                        float effectPoison = Mathf.Max(0.5f, (1f - item.holderCharacter.refs.afflictions.statusSum + 0.05f)) * 100f; // v.1.23.a BASED ON Scorpion.InflictAttack
-                        itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\n\n<#CCCCCC>NEXT STING WILL DEAL:</color>\n"
-                            + effectColors["Poison"] + effectPoison.ToString("F1").Replace(".0", "") + " POISON</color> OVER " 
-                            + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>(MORE DAMAGE IF HEALTHY)</color>\n";
-                    }
-                    else
-                    {
-                        itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> <#CCCCCC>YOU WHILE HELD FOR:</color>\nAT LEAST "
-                            + effectColors["Poison"] + "50 POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\nAT MOST "
-                            + effectColors["Poison"] + "105 POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "")
-                            + "s\n<#CCCCCC>(MORE DAMAGE IF HEALTHY)</color>\n"; // v.1.23.a THERE'S NO VARIABLE FOR POISON AMOUNT, CALCULATED IN Scorpion.InflictAttack
-                    }
-                    itemInfoDisplayTextMesh.text += "\n" + effectColors["Curse"] + "KILLED</color> WHEN " + effectColors["Heat"] + "COOKED</color>\n";
+                    float effectPoison = Mathf.Max(0.5f, (1f - item.holderCharacter.refs.afflictions.statusSum + 0.05f)) * 100f; // v.1.23.a BASED ON Scorpion.InflictAttack
+                    itemInfoDisplayTextMesh.text += "IF ALIVE, " + effectColors["Poison"] + "STINGS</color> YOU\n" + effectColors["Curse"] + "DIES</color> WHEN " + effectColors["Heat"] + "COOKED</color>\n\n" 
+                        + "<#CCCCCC>NEXT STING WILL DEAL:</color>\n" + effectColors["Poison"] + effectPoison.ToString("F1").Replace(".0", "") + " POISON</color> OVER " 
+                        + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>(MORE DAMAGE IF HEALTHY)</color>\n";
                 }
-                /* itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\nDEALS "
-                    + effectColors["Poison"] + (effect.poisonPerSecond * 100f * effect.totalPoisonTime).ToString("F1").Replace(".0", "") 
-                    + " POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n"; */ // v.1.20.a
+                else
+                {
+                    itemInfoDisplayTextMesh.text += "IF ALIVE, " + effectColors["Poison"] + "STINGS</color> YOU\n" + effectColors["Curse"] 
+                        + "DIES</color> WHEN " + effectColors["Heat"] + "COOKED</color>\n\n" + "<#CCCCCC>NEXT STING WILL DEAL:</color>\nAT LEAST "
+                        + effectColors["Poison"] + "50 POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\nAT MOST "
+                        + effectColors["Poison"] + "105 POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "")
+                        + "s\n<#CCCCCC>(MORE DAMAGE IF HEALTHY)</color>\n"; // v.1.23.a THERE'S NO VARIABLE FOR POISON AMOUNT, CALCULATED IN Scorpion.InflictAttack
+                }
             }
             else if (itemComponents[i].GetType() == typeof(Action_Spawn))
             {
@@ -583,8 +569,8 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(CactusBall))
             {
                 CactusBall effect = (CactusBall)itemComponents[i];
-                itemInfoDisplayTextMesh.text += effectColors["Thorns"] + "STICKS</color> TO YOUR BODY\nCAN BE " + effectColors["Hunger"] 
-                    + "THROWN</color> WITH " + (effect.throwChargeRequirement * 100f).ToString("F1").Replace(".0", "") + "% FORCE\n";
+                itemInfoDisplayTextMesh.text += effectColors["Thorns"] + "STICKS</color> TO YOUR BODY\n\nCAN " + effectColors["Hunger"] 
+                    + "THROW</color> BY USING\nAT LEAST " + (effect.throwChargeRequirement * 100f).ToString("F1").Replace(".0", "") + "% POWER\n";
             }
             else if (itemComponents[i].GetType() == typeof(BingBongShieldWhileHolding))
             {
@@ -601,10 +587,6 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     suffixCooked += "\n" + effectColors["Curse"] + "BREAKS IF COOKED</color>";
                 }
-                /*else if (isMobItem)
-                {
-                    suffixCooked += "\n" + effectColors["Curse"] + "KILLED</color> " + effectColors["Extra Stamina"] + "IF COOKED</color>";
-                }*/
                 else if (itemCooking.timesCookedLocal >= ItemCooking.COOKING_MAX)
                 {
                     suffixCooked += "   " + effectColors["Curse"] + itemCooking.timesCookedLocal.ToString() + "x COOKED\nCANNOT BE COOKED</color>";
@@ -822,36 +804,6 @@ public partial class Plugin : BaseUnityPlugin
             result += effectColors["Cold"] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "")
                 + " COLD</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
         }
-        /*else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.AdjustStatusOverTime)
-        {
-            Peak.Afflictions.Affliction_AdjustStatusOverTime effect = (Peak.Afflictions.Affliction_AdjustStatusOverTime)affliction; // 1.5.a
-            if (effect.statusPerSecond > 0)
-            {
-                if (effect.Equals("Extra Stamina"))
-                {
-                    result += effectColors["ItemInfoDisplayPositive"];
-                }
-                else
-                {
-                    result += effectColors["ItemInfoDisplayNegative"];
-                }
-                result += "GAIN</color> ";
-            }
-            else
-            {
-                if (effect.Equals("Extra Stamina"))
-                {
-                    result += effectColors["ItemInfoDisplayNegative"];
-                }
-                else
-                {
-                    result += effectColors["ItemInfoDisplayPositive"];
-                }
-                result += "REMOVE</color> ";
-            }
-            result += effectColors[effect.statusType.ToString()] + (Mathf.Abs(effect.statusPerSecond) * effect.totalTime * 100f).ToString("F1").Replace(".0", "") 
-                + " " + effect.statusType.ToString().ToUpper() + "</color> OVER " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
-        }*/
         else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Chaos)
         {
             result += effectColors["ItemInfoDisplayPositive"] + "CLEAR ALL STATUS</color>, THEN RANDOMIZE\n" + effectColors["Hunger"] + "HUNGER</color>, "
@@ -863,10 +815,6 @@ public partial class Plugin : BaseUnityPlugin
             Peak.Afflictions.Affliction_Sunscreen effect = (Peak.Afflictions.Affliction_Sunscreen)affliction;
             result += "PREVENT " + effectColors["Heat"] + "HEAT</color> IN MESA'S SUN FOR " + effect.totalTime.ToString("F1").Replace(".0", "") + "s\n";
         }
-        /*else if (affliction.GetAfflictionType() is Peak.Afflictions.Affliction.AfflictionType.Glowing)
-        {
-            result += "???\n";
-        }*/
 
         return result;
     }
