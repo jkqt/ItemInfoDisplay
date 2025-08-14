@@ -542,9 +542,10 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Scorpion))
             {
                 Scorpion effect = (Scorpion)itemComponents[i];
-                itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\nDEALS "
+                itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\n<#CCCCCC>DIES IF COOKED</color>\n"; // v.1.23.a not sure where poison amount is handled anymore
+                /* itemInfoDisplayTextMesh.text += effectColors["Poison"] + "STINGS</color> YOU WHILE HELD\nDEALS "
                     + effectColors["Poison"] + (effect.poisonPerSecond * 100f * effect.totalPoisonTime).ToString("F1").Replace(".0", "") 
-                    + " POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n";
+                    + " POISON</color> OVER " + effect.totalPoisonTime.ToString("F1").Replace(".0", "") + "s\n<#CCCCCC>DIES IF COOKED</color>\n"; */ // v.1.20.a
             }
             else if (itemComponents[i].GetType() == typeof(Action_Spawn))
             {

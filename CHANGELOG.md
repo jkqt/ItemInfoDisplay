@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.7 (for PEAK v.1.23.a)
+- Fixed mod breaking from removal of scorpion's poison var.
+
 ## 1.0.6 (for PEAK v.1.20.a)
 - Added thorns to description for Prickleberry.
 
