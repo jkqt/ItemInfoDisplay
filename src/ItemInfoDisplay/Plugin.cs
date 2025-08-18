@@ -235,7 +235,8 @@ public partial class Plugin : BaseUnityPlugin
             else if (itemComponents[i].GetType() == typeof(Action_InflictPoison))
             {
                 Action_InflictPoison effect = (Action_InflictPoison)itemComponents[i];
-                prefixStatus += "AFTER " + effect.delay.ToString() + "s, " + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
+                prefixStatus += GetText("InflictPoison", effect.delay.ToString(), ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison"));
+                //prefixStatus += "AFTER " + effect.delay.ToString() + "s, " + ProcessEffectOverTime(effect.poisonPerSecond, 1f, effect.inflictionTime, "Poison");
             }
             else if (itemComponents[i].GetType() == typeof(Action_AddOrRemoveThorns))
             {
@@ -309,10 +310,12 @@ public partial class Plugin : BaseUnityPlugin
             {
                 Lantern lantern = (Lantern)itemComponents[i];
                 if (itemGameObj.name.Equals("Torch(Clone)")){
-                    itemInfoDisplayTextMesh.text += "CAN BE LIT\n";
+                    itemInfoDisplayTextMesh.text += $"{GetText("Torch")}";
+                    //itemInfoDisplayTextMesh.text += "CAN BE LIT\n";
                 }
                 else {
-                    suffixAfflictions += "<#CCCCCC>WHEN LIT, NEARBY PLAYERS RECEIVE:</color>\n";
+                    suffixAfflictions += GetText("Lantern");
+                    //suffixAfflictions += "<#CCCCCC>WHEN LIT, NEARBY PLAYERS RECEIVE:</color>\n";
                 }
 
                 if (itemGameObj.name.Equals("Lantern_Faerie(Clone)"))
@@ -361,7 +364,8 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(ClimbingSpikeComponent))
             {
-                itemInfoDisplayTextMesh.text += "PLACE A PITON YOU CAN GRAB\nTO " + effectColors["Extra Stamina"] + "REGENERATE STAMINA</color>\n";
+                itemInfoDisplayTextMesh.text += $"{GetText("ClimbingSpike", effectColors["Extra Stamina"])}";
+                //itemInfoDisplayTextMesh.text += "PLACE A PITON YOU CAN GRAB\nTO " + effectColors["Extra Stamina"] + "REGENERATE STAMINA</color>\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_Flare))
             {
