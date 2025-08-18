@@ -292,7 +292,8 @@ public partial class Plugin : BaseUnityPlugin
                 Action_ConsumeAndSpawn effect = (Action_ConsumeAndSpawn)itemComponents[i];
                 if (effect.itemToSpawn.ToString().Contains("Peel"))
                 {
-                    itemInfoDisplayTextMesh.text += "<#CCCCCC>GAIN A PEEL WHEN EATEN</color>\n";
+                    itemInfoDisplayTextMesh.text += $"{GetText("ConsumeAndSpawn_Peel")}";
+                    //itemInfoDisplayTextMesh.text += "<#CCCCCC>GAIN A PEEL WHEN EATEN</color>\n";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(Action_ReduceUses))
@@ -302,7 +303,8 @@ public partial class Plugin : BaseUnityPlugin
                 {
                     if (uses.Value > 1)
                     {
-                        suffixUses += "   " + uses.Value + " USES";
+                        suffixUses += $"{GetText("ReduceUses", uses.Value.ToString())}";
+                        //suffixUses += "   " + uses.Value + " USES";
                     }
                 }
             }
