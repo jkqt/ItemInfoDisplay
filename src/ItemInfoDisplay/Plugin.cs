@@ -383,7 +383,7 @@ public partial class Plugin : BaseUnityPlugin
                 Constructable effect = (Constructable)itemComponents[i];
                 if (effect.constructedPrefab.name.Equals("PortableStovetop_Placed"))
                 {
-                    itemInfoDisplayTextMesh.text += $"{GetText("Constructable_PortableStovetop_Placed")}";
+                    itemInfoDisplayTextMesh.text += $"{GetText("Constructable_PortableStovetop_Placed", effectColors["Injury"], effect.constructedPrefab.GetComponent<Campfire>().burnsFor.ToString())}";
                     //itemInfoDisplayTextMesh.text += "PLACE A " + effectColors["Injury"] + "COOKING</color> STOVE FOR " + effect.constructedPrefab.GetComponent<Campfire>().burnsFor.ToString() + "s\n";
                 }
                 else
@@ -397,14 +397,17 @@ public partial class Plugin : BaseUnityPlugin
                 RopeSpool effect = (RopeSpool)itemComponents[i];
                 if (effect.isAntiRope)
                 {
-                    itemInfoDisplayTextMesh.text += "PLACE A ROPE THAT FLOATS UP\n";
+                    itemInfoDisplayTextMesh.text += $"{GetText("RopeSpool_AntiRope")}";
+                    //itemInfoDisplayTextMesh.text += "PLACE A ROPE THAT FLOATS UP\n";
                 }
                 else
                 {
-                    itemInfoDisplayTextMesh.text += "PLACE A ROPE\n";
+                    itemInfoDisplayTextMesh.text += $"{GetText("RopeSpool")}";
+                    //itemInfoDisplayTextMesh.text += "PLACE A ROPE\n";
                 }
-                itemInfoDisplayTextMesh.text += "FROM " + (effect.minSegments / 4f).ToString("F2").Replace(".0", "") + "m LONG, UP TO " 
-                    + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m LONG\n";
+                itemInfoDisplayTextMesh.text += $"{GetText("RopeSpool_TIP", (effect.minSegments / 4f).ToString("F2").Replace(".0", ""), (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", ""))}";
+                //itemInfoDisplayTextMesh.text += "FROM " + (effect.minSegments / 4f).ToString("F2").Replace(".0", "") + "m LONG, UP TO " 
+                //    + (Rope.MaxSegments / 4f).ToString("F1").Replace(".0", "") + "m LONG\n";
                 //using force update here for remaining length since Rope has no character distinction for Detach_Rpc() hook, maybe unless OK with any player triggering this
                 if (configForceUpdateTime.Value <= 1f)
                 {
@@ -465,16 +468,19 @@ public partial class Plugin : BaseUnityPlugin
                 }
                 else if (effect.instantiateOnBreak.name.Equals("ShelfShroomSpawn"))
                 {
-                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A PLATFORM\n";
+                    itemInfoDisplayTextMesh.text += $"{GetText("ShelfShroomSpawn", effectColors["Hunger"])}";
+                    //itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A PLATFORM\n";
                 }
                 else if (effect.instantiateOnBreak.name.Equals("BounceShroomSpawn"))
                 {
-                    itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A BOUNCE PAD\n";
+                    itemInfoDisplayTextMesh.text += $"{GetText("BounceShroomSpawn", effectColors["Hunger"])}";
+                    //itemInfoDisplayTextMesh.text += effectColors["Hunger"] + "THROW</color> TO DEPLOY A BOUNCE PAD\n";
                 }
             }
             else if (itemComponents[i].GetType() == typeof(ScoutEffigy))
             {
-                itemInfoDisplayTextMesh.text += effectColors["Extra Stamina"] + "REVIVE</color> A DEAD PLAYER\n";
+                itemInfoDisplayTextMesh.text += $"{GetText("ScoutEffigy", effectColors["Extra Stamina"])}";
+                //itemInfoDisplayTextMesh.text += effectColors["Extra Stamina"] + "REVIVE</color> A DEAD PLAYER\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_Die))
             {
@@ -540,7 +546,8 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Action_WarpToRandomPlayer))
             {
-                itemInfoDisplayTextMesh.text += "WARP TO RANDOM PLAYER\n";
+                itemInfoDisplayTextMesh.text += $"{GetText("WarpToRandomPlayer")}";
+                //itemInfoDisplayTextMesh.text += "WARP TO RANDOM PLAYER\n";
             }
             else if (itemComponents[i].GetType() == typeof(Action_WarpToBiome))
             {
