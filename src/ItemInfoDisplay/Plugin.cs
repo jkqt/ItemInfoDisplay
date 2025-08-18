@@ -39,7 +39,6 @@ public partial class Plugin : BaseUnityPlugin
     private static ConfigEntry<float> configLineSpacing;
     private static ConfigEntry<float> configSizeDeltaX;
     private static ConfigEntry<float> configForceUpdateTime;
-    private static bool? hasEasyBackPack = null;
 
     private void Awake()
     {
@@ -371,18 +370,7 @@ public partial class Plugin : BaseUnityPlugin
             }
             else if (itemComponents[i].GetType() == typeof(Backpack))
             {
-                if (hasEasyBackPack == null)
-                {
-                    hasEasyBackPack = Chainloader.PluginInfos.ContainsKey("nickklmao.easybackpack");
-                }
-                if (hasEasyBackPack == true)
-                {
-                    itemInfoDisplayTextMesh.text += $"{GetText("EasyBackPack")}";
-                }
-                else
-                {
-                    itemInfoDisplayTextMesh.text += $"{GetText("Backpack")}";
-                }
+                itemInfoDisplayTextMesh.text += $"{GetText("Backpack")}";
                 //itemInfoDisplayTextMesh.text += "DROP TO PLACE ITEMS INSIDE\n";
             }
             else if (itemComponents[i].GetType() == typeof(BananaPeel))
